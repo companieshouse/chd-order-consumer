@@ -8,5 +8,5 @@ public class ChdOrderConsumerApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ChdOrderConsumerApplication.class, args);
-	}
+    }
 }
