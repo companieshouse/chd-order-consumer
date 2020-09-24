@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ChdOrderConsumerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ChdOrderConsumerApplication.class, args);
+    public static void main(String[] args) {
+        SpringApplication.run(ChdOrderConsumerApplication.class, args);
 	}
-
 }
