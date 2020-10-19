@@ -24,6 +24,7 @@ public class LoggingUtils {
     public static final String NEXT_TOPIC = "next_topic";
     public static final String MESSAGE = "message";
     public static final String RETRY_ATTEMPT = "retry_attempt";
+    public static final String CHD_ITEM_ORDERED_GROUP_ERROR = "chd_item_ordered_error";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 

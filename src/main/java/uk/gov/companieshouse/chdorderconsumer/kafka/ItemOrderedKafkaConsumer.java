@@ -2,6 +2,7 @@ package uk.gov.companieshouse.chdorderconsumer.kafka;
 
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.MessageHeaders;
@@ -28,19 +29,29 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";
     private static final String CHD_ITEM_ORDERED_KEY_RETRY = CHD_ITEM_ORDERED_TOPIC_RETRY;
     private static final String CHD_ITEM_ORDERED_TOPIC_ERROR = "chd-item-ordered-error";
+
     private static final String CHD_ITEM_ORDERED_GROUP =
             APPLICATION_NAMESPACE + "-" + CHD_ITEM_ORDERED_TOPIC;
+    private static final String CHD_ITEM_ORDERED_GROUP_RETRY =
+            APPLICATION_NAMESPACE + "-" + CHD_ITEM_ORDERED_TOPIC_RETRY;
+    private static final String CHD_ITEM_ORDERED_GROUP_ERROR =
+            APPLICATION_NAMESPACE + "-" + CHD_ITEM_ORDERED_TOPIC_ERROR;
+
     private static final int MAX_RETRY_ATTEMPTS = 3;
+    private static long errorRecoveryOffset = 0L;
 
     private final Map<String, Integer> retryCount;
 
     private final SerializerFactory serializerFactory;
     private final ItemOrderedKafkaProducer kafkaProducer;
+    private final KafkaListenerEndpointRegistry registry;
 
-    public ItemOrderedKafkaConsumer(Map<String, Integer> retryCount, SerializerFactory serializerFactory, ItemOrderedKafkaProducer kafkaProducer) {
+    public ItemOrderedKafkaConsumer(SerializerFactory serializerFactory,
+                                    ItemOrderedKafkaProducer kafkaProducer, KafkaListenerEndpointRegistry registry) {
         this.retryCount = new HashMap<>();
         this.serializerFactory = serializerFactory;
         this.kafkaProducer = kafkaProducer;
+        this.registry = registry;
     }
 
     /**
@@ -54,6 +65,49 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
             containerFactory = "kafkaListenerContainerFactory")
     public void processOrderReceived(org.springframework.messaging.Message<OrderReceived> message) {
         handleMessage(message);
+    }
+
+    /**
+     * Retry (`-retry`) listener/consumer. Calls `handleMessage` method to process received message.
+     *
+     * @param message
+     */
+    @KafkaListener(id = CHD_ITEM_ORDERED_GROUP_RETRY, groupId = CHD_ITEM_ORDERED_GROUP_RETRY,
+            topics = CHD_ITEM_ORDERED_TOPIC_RETRY,
+            autoStartup = "#{!${uk.gov.companieshouse.chdorderconsumer.error-consumer}}",
+            containerFactory = "kafkaListenerContainerFactory")
+    public void processOrderReceivedRetry(
+            org.springframework.messaging.Message<OrderReceived> message) {
+        handleMessage(message);
+    }
+
+    /**
+     * Error (`-error`) topic listener/consumer is enabled when the application is launched in error
+     * mode (IS_ERROR_QUEUE_CONSUMER=true). Receives messages up to `errorRecoveryOffset` offset.
+     * Calls `handleMessage` method to process received message. If the `retryable` processor is
+     * unsuccessful with a `retryable` error, after maximum numbers of attempts allowed, the message
+     * is republished to `-retry` topic for failover processing. This listener stops accepting
+     * messages when the topic's offset reaches `errorRecoveryOffset`.
+     *
+     * @param message
+     */
+    @KafkaListener(id = CHD_ITEM_ORDERED_GROUP_ERROR, groupId = CHD_ITEM_ORDERED_GROUP_ERROR,
+            topics = CHD_ITEM_ORDERED_TOPIC_ERROR,
+            autoStartup = "${uk.gov.companieshouse.chdorderconsumer.error-consumer}",
+            containerFactory = "kafkaListenerContainerFactory")
+    public void processOrderReceivedError(
+            org.springframework.messaging.Message<OrderReceived> message) {
+        long offset = Long.parseLong("" + message.getHeaders().get("kafka_offset"));
+        if (offset <= errorRecoveryOffset) {
+            handleMessage(message);
+        } else {
+            Map<String, Object> logMap = LoggingUtils.createLogMap();
+            logMap.put(LoggingUtils.CHD_ITEM_ORDERED_GROUP_ERROR, errorRecoveryOffset);
+            logMap.put(LoggingUtils.TOPIC, CHD_ITEM_ORDERED_TOPIC_ERROR);
+            LoggingUtils.getLogger().info("Pausing error consumer as error recovery offset reached.",
+                    logMap);
+            registry.getListenerContainer(CHD_ITEM_ORDERED_GROUP_ERROR).pause();
+        }
     }
 
     /**
