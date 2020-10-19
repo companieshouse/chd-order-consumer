@@ -133,7 +133,6 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
         } catch (Exception x) {
             logMessageProcessingFailureNonRecoverable(message, x);
         }
-        System.out.println(orderReceivedUri);
     }
 
     protected void logMessageReceived(org.springframework.messaging.Message<OrderReceived> message,
