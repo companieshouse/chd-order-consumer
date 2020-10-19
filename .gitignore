@@ -17,3 +17,5 @@ bin/
 .DS_Store
 ._*
 
+build.log
+
