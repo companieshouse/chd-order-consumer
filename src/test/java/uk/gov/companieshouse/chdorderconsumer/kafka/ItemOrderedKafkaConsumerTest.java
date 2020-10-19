@@ -42,9 +42,9 @@ public class ItemOrderedKafkaConsumerTest {
 
     @Spy
     @InjectMocks
-    private ItemOrderedKafkaConsumer ordersKafkaConsumer;
+    private ItemOrderedKafkaConsumer kafkaConsumer;
     @Mock
-    private ItemOrderedKafkaProducer ordersKafkaProducer;
+    private ItemOrderedKafkaProducer kafkaProducer;
     @Mock
     private SerializerFactory serializerFactory;
     @Mock
@@ -77,9 +77,9 @@ public class ItemOrderedKafkaConsumerTest {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(OrderReceived.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
-        ordersKafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
+        kafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
         // Then
-        verify(ordersKafkaProducer, times(1)).sendMessage(any());
+        verify(kafkaProducer, times(1)).sendMessage(any());
     }
 
     @Test
@@ -88,9 +88,9 @@ public class ItemOrderedKafkaConsumerTest {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(OrderReceived.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenThrow(SerializationException.class);
-        ordersKafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
+        kafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
         // Then
-        verify(ordersKafkaProducer, times(1)).sendMessage(any());
+        verify(kafkaProducer, times(1)).sendMessage(any());
     }
 
     @Test
@@ -99,9 +99,9 @@ public class ItemOrderedKafkaConsumerTest {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(OrderReceived.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
-        ordersKafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_RETRY, CHD_ITEM_ORDERED_TOPIC_ERROR);
+        kafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_RETRY, CHD_ITEM_ORDERED_TOPIC_ERROR);
         // Then
-        verify(ordersKafkaProducer, times(1)).sendMessage(any());
+        verify(kafkaProducer, times(1)).sendMessage(any());
     }
 
     @Test
@@ -110,10 +110,10 @@ public class ItemOrderedKafkaConsumerTest {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(OrderReceived.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
-        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(ordersKafkaConsumer).logMessageReceived(any(), any());
-        ordersKafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC));
+        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).logMessageReceived(any(), any());
+        kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC));
         // Then
-        verify(ordersKafkaConsumer, times(1)).republishMessageToTopic(orderUriArgument.capture(),
+        verify(kafkaConsumer, times(1)).republishMessageToTopic(orderUriArgument.capture(),
                 currentTopicArgument.capture(), nextTopicArgument.capture());
         Assert.assertEquals(ORDER_RECEIVED_URI, orderUriArgument.getValue());
         Assert.assertEquals(CHD_ITEM_ORDERED_TOPIC, currentTopicArgument.getValue());
@@ -123,58 +123,58 @@ public class ItemOrderedKafkaConsumerTest {
     @Test
     public void republishMessageNotCalledForFirstRetryMessageOnRetryableErrorException() {
         // Given & When
-        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).doNothing().when(ordersKafkaConsumer).logMessageReceived(any(), any());
-        ordersKafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC_RETRY));
+        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).doNothing().when(kafkaConsumer).logMessageReceived(any(), any());
+        kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC_RETRY));
         // Then
-        verify(ordersKafkaConsumer, times(0)).republishMessageToTopic(anyString(), anyString(), anyString());
+        verify(kafkaConsumer, times(0)).republishMessageToTopic(anyString(), anyString(), anyString());
     }
 
     @Test
     public void republishMessageNotCalledForFirstErrorMessageOnRetryableErrorException() {
         // Given & When
-        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).doNothing().when(ordersKafkaConsumer).logMessageReceived(any(), any());
-        ordersKafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC_ERROR));
+        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).doNothing().when(kafkaConsumer).logMessageReceived(any(), any());
+        kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC_ERROR));
         // Then
-        verify(ordersKafkaConsumer, times(0)).republishMessageToTopic(anyString(), anyString(), anyString());
+        verify(kafkaConsumer, times(0)).republishMessageToTopic(anyString(), anyString(), anyString());
     }
 
     @Test
     public void mainListenerExceptionIsCorrectlyHandled() {
         // Given & When
-        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(ordersKafkaConsumer).processOrderReceived(any());
+        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processOrderReceived(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
-            ordersKafkaConsumer.processOrderReceived(any());
+            kafkaConsumer.processOrderReceived(any());
         });
         // Then
         String actualMessage = exception.getMessage();
         Assert.assertThat(actualMessage, Matchers.is(PROCESSING_ERROR_MESSAGE));
-        verify(ordersKafkaConsumer, times(1)).processOrderReceived(any());
+        verify(kafkaConsumer, times(1)).processOrderReceived(any());
     }
 
     @Test
     public void retryListenerExceptionIsCorrectlyHandled() {
         // Given & When
-        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(ordersKafkaConsumer).processOrderReceivedRetry(any());
+        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processOrderReceivedRetry(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
-            ordersKafkaConsumer.processOrderReceivedRetry(any());
+            kafkaConsumer.processOrderReceivedRetry(any());
         });
         // Then
         String actualMessage = exception.getMessage();
         Assert.assertThat(actualMessage, Matchers.is(PROCESSING_ERROR_MESSAGE));
-        verify(ordersKafkaConsumer, times(1)).processOrderReceivedRetry(any());
+        verify(kafkaConsumer, times(1)).processOrderReceivedRetry(any());
     }
 
     @Test
     public void errorListenerExceptionIsCorrectlyHandled() {
         // Given & When
-        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(ordersKafkaConsumer).processOrderReceivedError(any());
+        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processOrderReceivedError(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
-            ordersKafkaConsumer.processOrderReceivedError(any());
+            kafkaConsumer.processOrderReceivedError(any());
         });
         // Then
         String actualMessage = exception.getMessage();
         Assert.assertThat(actualMessage, Matchers.is(PROCESSING_ERROR_MESSAGE));
-        verify(ordersKafkaConsumer, times(1)).processOrderReceivedError(any());
+        verify(kafkaConsumer, times(1)).processOrderReceivedError(any());
     }
 
     private static org.springframework.messaging.Message createTestMessage(String receivedTopic) {

@@ -42,12 +42,14 @@ import static org.hamcrest.Matchers.isEmptyOrNullString;
 @TestPropertySource(properties={"uk.gov.companieshouse.chdorderconsumer.error-consumer=true"})
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
+
     private static final String CHD_ITEM_ORDERED_TOPIC = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";
     private static final String CHD_ITEM_ORDERED_TOPIC_ERROR = "chd-item-ordered-error";
     private static final String CONSUMER_GROUP_MAIN_RETRY = "chd-item-ordered-main-retry";
     private static final String ORDER_RECEIVED_URI = "/order/ORDER-12345";
     private static final String ORDER_RECEIVED_MESSAGE_JSON = "{\"order_uri\": \"/order/ORDER-12345\"}";
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String brokerAddresses;
     @Autowired
@@ -64,7 +66,7 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
 
     @BeforeEach
     public void setUp() {
-        setUpTestKafkaOrdersConsumer();
+        setUpTestKafkaItemOrderedConsumer();
     }
 
     @AfterEach
@@ -72,7 +74,7 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
         container.stop();
     }
 
-    private void setUpTestKafkaOrdersConsumer() {
+    private void setUpTestKafkaItemOrderedConsumer() {
         final Map<String, Object> consumerProperties = new HashMap<>();
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -99,8 +101,8 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     }
 
     @Test
-    @DisplayName("order-received topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
-    void testOrdersConsumerReceivesOrderReceivedMessage1() throws InterruptedException, ExecutionException, SerializationException {
+    @DisplayName("chd-item-ordered topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
+    void testItemOrderedConsumerReceivesOrderReceivedMessage1() throws InterruptedException, ExecutionException, SerializationException {
         // When
         kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC));
 
@@ -109,8 +111,8 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     }
 
     @Test
-    @DisplayName("order-received-retry topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
-    void testOrdersConsumerReceivesOrderReceivedMessage2Retry() throws InterruptedException, SerializationException, ExecutionException {
+    @DisplayName("chd-item-ordered-retry topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
+    void testItemOrderedConsumerReceivesOrderReceivedMessage2Retry() throws InterruptedException, SerializationException, ExecutionException {
         // When
         kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_RETRY));
 
@@ -126,8 +128,8 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     }
 
     @Test
-    @DisplayName("order-received-error topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is true")
-    void testOrdersConsumerReceivesOrderReceivedMessage3Error() throws InterruptedException, ExecutionException, SerializationException {
+    @DisplayName("chd-item-ordered-error topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is true")
+    void testItemOrderedConsumerReceivesOrderReceivedMessage3Error() throws InterruptedException, ExecutionException, SerializationException {
         // When
         kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_ERROR));
 
