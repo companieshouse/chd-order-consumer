@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemOrderedKafkaConsumerTest {
-    private static final String ORDER_RECEIVED_URI = "/order/ORDER-12345";
+    private static final String ORDER_RECEIVED_URI = "/order/ORD-123456-123456";
     private static final String CHD_ITEM_ORDERED_TOPIC = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_KEY = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";

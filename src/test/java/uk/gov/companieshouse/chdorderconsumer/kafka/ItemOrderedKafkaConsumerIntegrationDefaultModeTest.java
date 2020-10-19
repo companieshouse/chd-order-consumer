@@ -47,8 +47,8 @@ public class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";
     private static final String CHD_ITEM_ORDERED_TOPIC_ERROR = "chd-item-ordered-error";
     private static final String GROUP_NAME = "chd-item-ordered-consumers";
-    private static final String ORDER_RECEIVED_URI = "/order/ORDER-12345";
-    private static final String ORDER_RECEIVED_MESSAGE_JSON = "{\"order_uri\": \"/order/ORDER-12345\"}";
+    private static final String ORDER_RECEIVED_URI = "/order/ORD-123456-123456";
+    private static final String ORDER_RECEIVED_MESSAGE_JSON = "{\"order_uri\": \"/order/ORD-123456-123456\"}";
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String brokerAddresses;
