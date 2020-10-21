@@ -16,6 +16,7 @@ Kafka consumer to process scan upon demand orders.
 Name | Description | Mandatory | Location
 --- | --- | --- | ---
 CHD_ORDER_CONSUMER_PORT | Port this application runs on when deployed. | ✓ | start.sh
+CHS_API_KEY | Key identifying this client for requests to internal APIs. |✓|env var|
 
 ### Endpoints
 Path | Method | Description
