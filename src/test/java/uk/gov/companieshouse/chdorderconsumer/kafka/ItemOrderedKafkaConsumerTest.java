@@ -18,7 +18,7 @@ import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
-import uk.gov.companieshouse.orders.OrderReceived;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,16 +66,16 @@ public class ItemOrderedKafkaConsumerTest {
         Message actualMessage = consumerUnderTest.createRetryMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC);
         byte[] actualMessageRawValue    = actualMessage.getValue();
         // Then
-        OrderReceivedDeserializer deserializer = new OrderReceivedDeserializer();
-        String actualOrderReceived = (String) deserializer.deserialize(CHD_ITEM_ORDERED_TOPIC, actualMessageRawValue).get(0);
-        Assert.assertThat(actualOrderReceived, Matchers.is(ORDER_RECEIVED_URI));
+        ChdItemOrderedDeserializer deserializer = new ChdItemOrderedDeserializer();
+        String actualChdItemOrdered = (String) deserializer.deserialize(CHD_ITEM_ORDERED_TOPIC, actualMessageRawValue).get(0);
+        Assert.assertThat(actualChdItemOrdered, Matchers.is(ORDER_RECEIVED_URI));
     }
 
     @Test
     public void republishMessageToRetryTopicRunsSuccessfully()
             throws ExecutionException, InterruptedException, SerializationException {
         // Given & When
-        when(serializerFactory.getGenericRecordSerializer(OrderReceived.class)).thenReturn(serializer);
+        when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
         kafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
         // Then
@@ -86,7 +86,7 @@ public class ItemOrderedKafkaConsumerTest {
     public void republishMessageToRetryTopicThrowsSerializationException()
             throws ExecutionException, InterruptedException, SerializationException {
         // Given & When
-        when(serializerFactory.getGenericRecordSerializer(OrderReceived.class)).thenReturn(serializer);
+        when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenThrow(SerializationException.class);
         kafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
         // Then
@@ -97,7 +97,7 @@ public class ItemOrderedKafkaConsumerTest {
     public void republishMessageToErrorTopicRunsSuccessfully()
             throws ExecutionException, InterruptedException, SerializationException {
         // Given & When
-        when(serializerFactory.getGenericRecordSerializer(OrderReceived.class)).thenReturn(serializer);
+        when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
         kafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_RETRY, CHD_ITEM_ORDERED_TOPIC_ERROR);
         // Then
@@ -108,7 +108,7 @@ public class ItemOrderedKafkaConsumerTest {
     public void republishMessageSuccessfullyCalledForFirstMainMessageOnRetryableErrorException()
             throws SerializationException {
         // Given & When
-        when(serializerFactory.getGenericRecordSerializer(OrderReceived.class)).thenReturn(serializer);
+        when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).logMessageReceived(any(), any());
         kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC));
@@ -141,49 +141,53 @@ public class ItemOrderedKafkaConsumerTest {
     @Test
     public void mainListenerExceptionIsCorrectlyHandled() {
         // Given & When
-        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processOrderReceived(any());
+        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processChdItemOrdered(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
-            kafkaConsumer.processOrderReceived(any());
+            kafkaConsumer.processChdItemOrdered(any());
         });
         // Then
         String actualMessage = exception.getMessage();
         Assert.assertThat(actualMessage, Matchers.is(PROCESSING_ERROR_MESSAGE));
-        verify(kafkaConsumer, times(1)).processOrderReceived(any());
+        verify(kafkaConsumer, times(1)).processChdItemOrdered(any());
     }
 
     @Test
     public void retryListenerExceptionIsCorrectlyHandled() {
         // Given & When
-        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processOrderReceivedRetry(any());
+        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processChdItemOrderedRetry(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
-            kafkaConsumer.processOrderReceivedRetry(any());
+            kafkaConsumer.processChdItemOrderedRetry(any());
         });
         // Then
         String actualMessage = exception.getMessage();
         Assert.assertThat(actualMessage, Matchers.is(PROCESSING_ERROR_MESSAGE));
-        verify(kafkaConsumer, times(1)).processOrderReceivedRetry(any());
+        verify(kafkaConsumer, times(1)).processChdItemOrderedRetry(any());
     }
 
     @Test
     public void errorListenerExceptionIsCorrectlyHandled() {
         // Given & When
-        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processOrderReceivedError(any());
+        doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processChdItemOrderedError(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
-            kafkaConsumer.processOrderReceivedError(any());
+            kafkaConsumer.processChdItemOrderedError(any());
         });
         // Then
         String actualMessage = exception.getMessage();
         Assert.assertThat(actualMessage, Matchers.is(PROCESSING_ERROR_MESSAGE));
-        verify(kafkaConsumer, times(1)).processOrderReceivedError(any());
+        verify(kafkaConsumer, times(1)).processChdItemOrderedError(any());
     }
 
     private static org.springframework.messaging.Message createTestMessage(String receivedTopic) {
-        return new org.springframework.messaging.Message<OrderReceived>() {
+        return new org.springframework.messaging.Message<ChdItemOrdered>() {
             @Override
-            public OrderReceived getPayload() {
-                OrderReceived orderReceived = new OrderReceived();
-                orderReceived.setOrderUri(ORDER_RECEIVED_URI);
-                return orderReceived;
+            public ChdItemOrdered getPayload() {
+                ChdItemOrdered chdItemOrdered = new ChdItemOrdered();
+
+                // TODO GCI-1594 deal with ChdItemOrdered attributes.
+                //chdItemOrdered.setOrderUri(ORDER_RECEIVED_URI);
+                chdItemOrdered.setReference(ORDER_RECEIVED_URI);
+
+                return chdItemOrdered;
             }
 
             @Override

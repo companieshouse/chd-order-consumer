@@ -5,7 +5,7 @@ import org.springframework.messaging.MessageHeaders;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-import uk.gov.companieshouse.orders.OrderReceived;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class LoggingUtils {
     }
 
     public static Map<String, Object> getMessageHeadersAsMap(
-            org.springframework.messaging.Message<OrderReceived> message) {
+            org.springframework.messaging.Message<ChdItemOrdered> message) {
         Map<String, Object> logMap = LoggingUtils.createLogMap();
         MessageHeaders messageHeaders = message.getHeaders();
 

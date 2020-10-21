@@ -15,7 +15,7 @@ import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-import uk.gov.companieshouse.orders.OrderReceived;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
@@ -52,9 +52,9 @@ public class ItemOrderedKafkaConsumerWrapper {
      * @param message
      * @throws Exception
      */
-    @Before(value = "execution(* uk.gov.companieshouse.chdorderconsumer.kafka.ItemOrderedKafkaConsumer.processOrderReceived(..)) && args(message)")
+    @Before(value = "execution(* uk.gov.companieshouse.chdorderconsumer.kafka.ItemOrderedKafkaConsumer.processChdItemOrdered(..)) && args(message)")
     public void beforeItemOrderedProcessed(final Message message) throws Exception {
-        LOGGER.info("ItemOrderedKafkaConsumer.processOrderReceived() @Before triggered");
+        LOGGER.info("ItemOrderedKafkaConsumer.processChdItemOrdered() @Before triggered");
         if (this.testType != CHConsumerType.MAIN_CONSUMER) {
             throw new Exception("Mock main listener exception");
         }
@@ -68,7 +68,7 @@ public class ItemOrderedKafkaConsumerWrapper {
      */
     @AfterThrowing(pointcut = "execution(* uk.gov.companieshouse.chdorderconsumer.kafka.ItemOrderedKafkaConsumer.*(..))", throwing = "x")
     public void orderProcessedException(final Exception x) throws Throwable {
-        LOGGER.info("ItemOrderedKafkaConsumer.processOrderReceived() @AfterThrowing triggered");
+        LOGGER.info("ItemOrderedKafkaConsumer.processChdItemOrdered() @AfterThrowing triggered");
 
         setUpTestKafkaItemOrderedProducerAndSendMessageToTopic();
     }
@@ -79,7 +79,7 @@ public class ItemOrderedKafkaConsumerWrapper {
      */
     @After(value = "execution(* uk.gov.companieshouse.chdorderconsumer.kafka.ItemOrderedKafkaConsumer.*(..)) && args(message)")
     public void afterItemOrderedProcessed(final Message message){
-        LOGGER.info("ItemOrderedKafkaConsumer.processOrderReceivedRetry() @After triggered");
+        LOGGER.info("ItemOrderedKafkaConsumer.processChdItemOrderedRetry() @After triggered");
         this.orderUri = "" + message.getPayload();
         latch.countDown();
     }
@@ -102,12 +102,15 @@ public class ItemOrderedKafkaConsumerWrapper {
 
     public uk.gov.companieshouse.kafka.message.Message createMessage(String orderUri, String topic) throws SerializationException {
         final uk.gov.companieshouse.kafka.message.Message message = new uk.gov.companieshouse.kafka.message.Message();
-        AvroSerializer serializer = serializerFactory.getGenericRecordSerializer(OrderReceived.class);
-        OrderReceived orderReceived = new OrderReceived();
-        orderReceived.setOrderUri(orderUri.trim());
+        AvroSerializer serializer = serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class);
+        ChdItemOrdered chdItemOrdered = new ChdItemOrdered();
+
+        // TODO GCI-1594 deal with ChdItemOrdered attributes.
+        //chdItemOrdered.setOrderUri(orderUri.trim());
+        chdItemOrdered.setReference(orderUri.trim());
 
         message.setKey(CHD_ITEM_ORDERED_KEY_RETRY);
-        message.setValue(serializer.toBinary(orderReceived));
+        message.setValue(serializer.toBinary(chdItemOrdered));
         message.setTopic(topic);
         message.setTimestamp(new Date().getTime());
 

@@ -8,19 +8,19 @@ import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.orders.OrderReceived;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 import java.util.Arrays;
 import java.util.Map;
 
 @Component
-public class OrderReceivedDeserializer<T extends IndexedRecord> implements Deserializer<T> {
+public class ChdItemOrderedDeserializer<T extends IndexedRecord> implements Deserializer<T> {
     @SuppressWarnings("unchecked")
     @Override
     public T deserialize(String topic, byte[] data) {
         try {
             Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
-            DatumReader<OrderReceived> reader = new ReflectDatumReader<>(OrderReceived.class);
+            DatumReader<ChdItemOrdered> reader = new ReflectDatumReader<>(ChdItemOrdered.class);
             return (T)reader.read(null, decoder);
         } catch (Exception e) {
             throw new SerializationException(

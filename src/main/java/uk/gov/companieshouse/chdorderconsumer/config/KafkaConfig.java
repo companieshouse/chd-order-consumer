@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import uk.gov.companieshouse.chdorderconsumer.kafka.OrderReceivedDeserializer;
-import uk.gov.companieshouse.orders.OrderReceived;
+import uk.gov.companieshouse.chdorderconsumer.kafka.ChdItemOrderedDeserializer;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,14 +20,14 @@ public class KafkaConfig {
     private String bootstrapServers;
 
     @Bean
-    public ConsumerFactory<String, OrderReceived> consumerFactoryMessage() {
+    public ConsumerFactory<String, ChdItemOrdered> consumerFactoryMessage() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(),
-                new OrderReceivedDeserializer<>());
+                new ChdItemOrderedDeserializer<>());
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, OrderReceived> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, OrderReceived> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, ChdItemOrdered> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ChdItemOrdered> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactoryMessage());
         return factory;
     }
@@ -36,7 +36,7 @@ public class KafkaConfig {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, OrderReceivedDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ChdItemOrderedDeserializer.class);
 
         return props;
     }

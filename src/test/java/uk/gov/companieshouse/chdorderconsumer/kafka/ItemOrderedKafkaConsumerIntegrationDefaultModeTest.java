@@ -23,7 +23,7 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
 import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
-import uk.gov.companieshouse.orders.OrderReceived;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +57,7 @@ public class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
     @Autowired
     private ItemOrderedKafkaProducer kafkaProducer;
 
-    private KafkaMessageListenerContainer<String, OrderReceived> container;
+    private KafkaMessageListenerContainer<String, ChdItemOrdered> container;
 
     private BlockingQueue<ConsumerRecord<String, String>> records;
 
@@ -77,11 +77,11 @@ public class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
     private void setUpTestKafkaItemOrderedConsumer() {
         final Map<String, Object> consumerProperties = new HashMap<>();
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, OrderReceivedDeserializer.class);
+        consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ChdItemOrderedDeserializer.class);
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_NAME);
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerAddresses);
 
-        final DefaultKafkaConsumerFactory<String, OrderReceived> consumerFactory =
+        final DefaultKafkaConsumerFactory<String, ChdItemOrdered> consumerFactory =
                 new DefaultKafkaConsumerFactory<>(consumerProperties);
 
         final ContainerProperties containerProperties = new ContainerProperties(
@@ -103,15 +103,15 @@ public class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
     @Test
     @DirtiesContext
     @DisplayName("chd-item-ordered-error topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is false")
-    void testItemOrderedConsumerReceivesOrderReceivedMessage1Error() throws InterruptedException, ExecutionException, SerializationException {
+    void testItemOrderedConsumerReceivesChdItemOrderedMessage1Error() throws InterruptedException, ExecutionException, SerializationException {
         // When
         kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_ERROR));
 
         // Then
-        verifyProcessOrderReceivedNotInvoked(CHConsumerType.ERROR_CONSUMER);
+        verifyProcessChdItemOrderedNotInvoked(CHConsumerType.ERROR_CONSUMER);
     }
 
-    private void verifyProcessOrderReceivedNotInvoked(CHConsumerType type) throws InterruptedException {
+    private void verifyProcessChdItemOrderedNotInvoked(CHConsumerType type) throws InterruptedException {
         consumerWrapper.setTestType(type);
         consumerWrapper.getLatch().await(3000, TimeUnit.MILLISECONDS);
         assertThat(consumerWrapper.getLatch().getCount(), is(equalTo(1L)));
@@ -122,26 +122,26 @@ public class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
     @Test
     @DirtiesContext
     @DisplayName("chd-item-ordered topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is false")
-    void testItemOrderedConsumerReceivesOrderReceivedMessage2() throws InterruptedException, ExecutionException, SerializationException {
+    void testItemOrderedConsumerReceivesChdItemOrderedMessage2() throws InterruptedException, ExecutionException, SerializationException {
         // When
         kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC));
 
         // Then
-        verifyProcessOrderReceivedInvoked(CHConsumerType.MAIN_CONSUMER);
+        verifyProcessChdItemOrderedInvoked(CHConsumerType.MAIN_CONSUMER);
     }
 
     @Test
     @DirtiesContext
     @DisplayName("chd-item-ordered topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is false")
-    void testItemOrderedConsumerReceivesOrderReceivedMessage3Retry() throws InterruptedException, ExecutionException, SerializationException {
+    void testItemOrderedConsumerReceivesChdItemOrderedMessage3Retry() throws InterruptedException, ExecutionException, SerializationException {
         // When
         kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_RETRY));
 
         // Then
-        verifyProcessOrderReceivedInvoked(CHConsumerType.RETRY_CONSUMER);
+        verifyProcessChdItemOrderedInvoked(CHConsumerType.RETRY_CONSUMER);
     }
 
-    private void verifyProcessOrderReceivedInvoked(CHConsumerType type) throws InterruptedException {
+    private void verifyProcessChdItemOrderedInvoked(CHConsumerType type) throws InterruptedException {
         consumerWrapper.setTestType(type);
         consumerWrapper.getLatch().await(3000, TimeUnit.MILLISECONDS);
         assertThat(consumerWrapper.getLatch().getCount(), is(equalTo(0L)));
