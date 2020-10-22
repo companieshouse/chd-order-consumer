@@ -1,20 +1,27 @@
 package uk.gov.companieshouse.chdorderconsumer.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 import uk.gov.companieshouse.orders.items.Item;
 import uk.gov.companieshouse.orders.items.ItemCosts;
 import uk.gov.companieshouse.orders.items.Links;
 import uk.gov.companieshouse.orders.items.OrderedBy;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static uk.gov.companieshouse.chdorderconsumer.util.TestConstants.MISSING_IMAGE_DELIVERY_ITEM_ID;
 import static uk.gov.companieshouse.chdorderconsumer.util.TestConstants.ORDER_REFERENCE;
 
 public class TestUtils {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
      * Creates a valid single MID item order with all the required fields populated.
@@ -33,10 +40,15 @@ public class TestUtils {
 // TODO GCI-1594 Check product type is conveyed correctly to this consumer
         final ItemCosts costs = new ItemCosts("0", "3", "3", "missing-image-delivery-accounts");
         item.setItemCosts(singletonList(costs));
-// TODO GCI-1594 Options
-//        final MissingImageDeliveryItemOptions options = new MissingImageDeliveryItemOptions();
-//        item.setItemOptions(options);
-        item.setItemOptions(new HashMap<>());
+        final Map<String, String> options = new HashMap<>();
+        options.put("filingHistoryDescriptionValues",
+                "{\"change_date\":\"2010-02-12\",\"officer_name\":\"Thomas David Wheare\"}");
+        options.put("filingHistoryCategory", "officers");
+        options.put("filingHistoryDate", "2010-02-12");
+        options.put("filingHistoryDescription", "change-person-director-company-with-change-date");
+        options.put("filingHistoryId", "MzAwOTM2MDg5OWFkaXF6a2N4");
+        options.put("filingHistoryType", "CH01");
+        item.setItemOptions(options);
         final Links links = new Links();
         links.setSelf("/orderable/missing-image-deliveries/MID-535516-028321");
         item.setLinks(links);
@@ -58,6 +70,18 @@ public class TestUtils {
         order.setReference(ORDER_REFERENCE);
         order.setTotalOrderCost("3");
         return order;
+    }
+
+    /**
+     * Asserts that two JSON strings are equal, ignoring any differences in the ordering of fields.
+     * @param json1 the first JSON string
+     * @param json2 the second JSON string
+     * @throws IOException should something unexpected happen.
+     */
+    public static void assertJsonsEqualIgnoringFieldOrdering(final String json1, final String json2) throws IOException  {
+        final JsonNode payloadJsonNode = MAPPER.readTree(json1);
+        final JsonNode orderJsonNode = MAPPER.readTree(json2);
+        assertThat(payloadJsonNode.equals(orderJsonNode), is(true));
     }
 
 }

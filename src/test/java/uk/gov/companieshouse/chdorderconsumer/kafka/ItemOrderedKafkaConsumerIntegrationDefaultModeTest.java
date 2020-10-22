@@ -34,6 +34,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.assertJsonsEqualIgnoringFieldOrdering;
 import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 
 @SpringBootTest
@@ -46,7 +47,6 @@ class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";
     private static final String CHD_ITEM_ORDERED_TOPIC_ERROR = "chd-item-ordered-error";
     private static final String GROUP_NAME = "chd-item-ordered-consumers";
-    private static final String ORDER_REFERENCE = "ORD-123456-123456";
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String brokerAddresses;
@@ -153,6 +153,7 @@ class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
         consumerWrapper.getLatch().await(3000, TimeUnit.MILLISECONDS);
         assertThat(consumerWrapper.getLatch().getCount(), is(equalTo(0L)));
         final String messagePayload = consumerWrapper.getMessagePayload();
-        assertThat(messagePayload, is(equalTo(order.toString())));
+        assertJsonsEqualIgnoringFieldOrdering(messagePayload, order.toString());
     }
+
 }

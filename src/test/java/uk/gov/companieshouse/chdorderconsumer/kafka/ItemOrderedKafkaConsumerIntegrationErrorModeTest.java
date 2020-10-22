@@ -31,9 +31,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.assertJsonsEqualIgnoringFieldOrdering;
 import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 
 @SpringBootTest
@@ -141,10 +140,10 @@ class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     }
 
     private void verifyProcessChdItemOrderedInvoked(final ChdItemOrdered order,
-                                                    final CHConsumerType type) throws InterruptedException {
+                                                    final CHConsumerType type) throws Exception {
         consumerWrapper.setTestType(type);
         consumerWrapper.getLatch().await(6000, TimeUnit.MILLISECONDS);
         final String messagePayload = consumerWrapper.getMessagePayload();
-        assertThat(messagePayload, is(equalTo(order.toString())));
+        assertJsonsEqualIgnoringFieldOrdering(messagePayload, order.toString());
     }
 }
