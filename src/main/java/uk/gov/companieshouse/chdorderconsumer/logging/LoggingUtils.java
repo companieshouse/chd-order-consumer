@@ -19,12 +19,12 @@ public class LoggingUtils {
     public static final String OFFSET = "offset";
     public static final String KEY = "key";
     public static final String PARTITION = "partition";
-    public static final String ORDER_URI = "order_uri";
     public static final String CURRENT_TOPIC = "current_topic";
     public static final String NEXT_TOPIC = "next_topic";
     public static final String MESSAGE = "message";
     public static final String RETRY_ATTEMPT = "retry_attempt";
     public static final String CHD_ITEM_ORDERED_GROUP_ERROR = "chd_item_ordered_error";
+    public static final String ORDER_REFERENCE_NUMBER = "order_reference_number";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
