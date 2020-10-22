@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.chdorderconsumer.kafka;
 
-import org.apache.avro.generic.IndexedRecord;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,11 +31,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestConstants.ORDER_REFERENCE;
 import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 
 @ExtendWith(MockitoExtension.class)
 class ItemOrderedKafkaConsumerTest {
-    private static final String ORDER_REFERENCE = "ORD-123456-123456";
     private static final String CHD_ITEM_ORDERED_TOPIC = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_KEY = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";
@@ -200,13 +198,7 @@ class ItemOrderedKafkaConsumerTest {
         return new org.springframework.messaging.Message<ChdItemOrdered>() {
             @Override
             public ChdItemOrdered getPayload() {
-                ChdItemOrdered chdItemOrdered = new ChdItemOrdered();
-
-                // TODO GCI-1594 deal with ChdItemOrdered attributes.
-                //chdItemOrdered.setOrderUri(ORDER_RECEIVED_URI);
-                chdItemOrdered.setReference(ORDER_REFERENCE);
-
-                return chdItemOrdered;
+                return createOrder();
             }
 
             @Override

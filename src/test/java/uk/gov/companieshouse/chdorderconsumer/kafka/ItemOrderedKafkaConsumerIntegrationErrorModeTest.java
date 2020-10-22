@@ -103,7 +103,7 @@ class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     @DisplayName("chd-item-ordered topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
     void testItemOrderedConsumerReceivesChdItemOrderedMessage1() throws Exception {
         // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(createOrder(), ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC));
+        kafkaProducer.sendMessage(consumerWrapper.createMessage(createOrder(), CHD_ITEM_ORDERED_TOPIC));
 
         // Then
         verifyProcessChdItemOrderedNotInvoked(CHConsumerType.MAIN_CONSUMER);
@@ -113,8 +113,7 @@ class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     @DisplayName("chd-item-ordered-retry topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
     void testItemOrderedConsumerReceivesChdItemOrderedMessage2Retry() throws Exception {
         // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(
-                createOrder(), ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_RETRY));
+        kafkaProducer.sendMessage(consumerWrapper.createMessage(createOrder(), CHD_ITEM_ORDERED_TOPIC_RETRY));
 
         // Then
         verifyProcessChdItemOrderedNotInvoked(CHConsumerType.RETRY_CONSUMER);
@@ -135,7 +134,7 @@ class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
         final ChdItemOrdered order = createOrder();
 
         // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(order, ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_ERROR));
+        kafkaProducer.sendMessage(consumerWrapper.createMessage(order, CHD_ITEM_ORDERED_TOPIC_ERROR));
 
         // Then
         verifyProcessChdItemOrderedInvoked(order, CHConsumerType.ERROR_CONSUMER);
