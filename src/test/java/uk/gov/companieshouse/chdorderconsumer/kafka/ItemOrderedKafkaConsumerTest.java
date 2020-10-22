@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.chdorderconsumer.kafka;
 
+import org.apache.avro.generic.IndexedRecord;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -24,12 +25,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 
 @ExtendWith(MockitoExtension.class)
 class ItemOrderedKafkaConsumerTest {
@@ -58,17 +62,23 @@ class ItemOrderedKafkaConsumerTest {
 
     @Test
     void createRetryMessageBuildsMessageSuccessfully() {
-        // Given & When
-        ItemOrderedKafkaConsumer consumerUnderTest =
+        // Given
+        final ItemOrderedKafkaConsumer consumerUnderTest =
                 new ItemOrderedKafkaConsumer(new SerializerFactory(),
                         new ItemOrderedKafkaProducer(),
                         new KafkaListenerEndpointRegistry());
-        Message actualMessage = consumerUnderTest.createRetryMessage(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC);
-        byte[] actualMessageRawValue    = actualMessage.getValue();
+        final ChdItemOrdered originalOrder = createOrder();
+
+        // When
+        final Message retryMessage =
+                consumerUnderTest.createRetryMessage(originalOrder, ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC);
+
         // Then
-        ChdItemOrderedDeserializer deserializer = new ChdItemOrderedDeserializer();
-        String actualChdItemOrdered = (String) deserializer.deserialize(CHD_ITEM_ORDERED_TOPIC, actualMessageRawValue).get(0);
-        Assert.assertThat(actualChdItemOrdered, Matchers.is(ORDER_REFERENCE));
+        final byte[] retryMessageRawValue = retryMessage.getValue();
+        final ChdItemOrderedDeserializer deserializer = new ChdItemOrderedDeserializer();
+        final ChdItemOrdered deserializedOrderFromRetryMessage =
+                (ChdItemOrdered) deserializer.deserialize(CHD_ITEM_ORDERED_TOPIC, retryMessageRawValue);
+        assertThat(deserializedOrderFromRetryMessage, is(originalOrder));
     }
 
     @Test
@@ -77,7 +87,10 @@ class ItemOrderedKafkaConsumerTest {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
-        kafkaConsumer.republishMessageToTopic(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
+        kafkaConsumer.republishMessageToTopic(createOrder(),
+                                              ORDER_REFERENCE,
+                                              CHD_ITEM_ORDERED_TOPIC,
+                                              CHD_ITEM_ORDERED_TOPIC_RETRY);
         // Then
         verify(kafkaProducer, times(1)).sendMessage(any());
     }
@@ -88,7 +101,10 @@ class ItemOrderedKafkaConsumerTest {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenThrow(SerializationException.class);
-        kafkaConsumer.republishMessageToTopic(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
+        kafkaConsumer.republishMessageToTopic(createOrder(),
+                                              ORDER_REFERENCE,
+                                              CHD_ITEM_ORDERED_TOPIC,
+                                              CHD_ITEM_ORDERED_TOPIC_RETRY);
         // Then
         verify(kafkaProducer, times(1)).sendMessage(any());
     }
@@ -99,7 +115,10 @@ class ItemOrderedKafkaConsumerTest {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
-        kafkaConsumer.republishMessageToTopic(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_RETRY, CHD_ITEM_ORDERED_TOPIC_ERROR);
+        kafkaConsumer.republishMessageToTopic(createOrder(),
+                                              ORDER_REFERENCE,
+                                              CHD_ITEM_ORDERED_TOPIC_RETRY,
+                                              CHD_ITEM_ORDERED_TOPIC_ERROR);
         // Then
         verify(kafkaProducer, times(1)).sendMessage(any());
     }
@@ -113,7 +132,7 @@ class ItemOrderedKafkaConsumerTest {
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).logMessageReceived(any(), any());
         kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC));
         // Then
-        verify(kafkaConsumer, times(1)).republishMessageToTopic(orderReferenceArgument.capture(),
+        verify(kafkaConsumer, times(1)).republishMessageToTopic(any(ChdItemOrdered.class), orderReferenceArgument.capture(),
                 currentTopicArgument.capture(), nextTopicArgument.capture());
         Assert.assertEquals(ORDER_REFERENCE, orderReferenceArgument.getValue());
         Assert.assertEquals(CHD_ITEM_ORDERED_TOPIC, currentTopicArgument.getValue());
@@ -126,7 +145,7 @@ class ItemOrderedKafkaConsumerTest {
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).doNothing().when(kafkaConsumer).logMessageReceived(any(), any());
         kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC_RETRY));
         // Then
-        verify(kafkaConsumer, times(0)).republishMessageToTopic(anyString(), anyString(), anyString());
+        verify(kafkaConsumer, times(0)).republishMessageToTopic(any(ChdItemOrdered.class), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -135,7 +154,7 @@ class ItemOrderedKafkaConsumerTest {
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).doNothing().when(kafkaConsumer).logMessageReceived(any(), any());
         kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC_ERROR));
         // Then
-        verify(kafkaConsumer, times(0)).republishMessageToTopic(anyString(), anyString(), anyString());
+        verify(kafkaConsumer, times(0)).republishMessageToTopic(any(ChdItemOrdered.class), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -147,7 +166,7 @@ class ItemOrderedKafkaConsumerTest {
         });
         // Then
         String actualMessage = exception.getMessage();
-        Assert.assertThat(actualMessage, Matchers.is(PROCESSING_ERROR_MESSAGE));
+        assertThat(actualMessage, is(PROCESSING_ERROR_MESSAGE));
         verify(kafkaConsumer, times(1)).processChdItemOrdered(any());
     }
 
@@ -160,7 +179,7 @@ class ItemOrderedKafkaConsumerTest {
         });
         // Then
         String actualMessage = exception.getMessage();
-        Assert.assertThat(actualMessage, Matchers.is(PROCESSING_ERROR_MESSAGE));
+        assertThat(actualMessage, is(PROCESSING_ERROR_MESSAGE));
         verify(kafkaConsumer, times(1)).processChdItemOrderedRetry(any());
     }
 
@@ -173,7 +192,7 @@ class ItemOrderedKafkaConsumerTest {
         });
         // Then
         String actualMessage = exception.getMessage();
-        Assert.assertThat(actualMessage, Matchers.is(PROCESSING_ERROR_MESSAGE));
+        assertThat(actualMessage, is(PROCESSING_ERROR_MESSAGE));
         verify(kafkaConsumer, times(1)).processChdItemOrderedError(any());
     }
 
