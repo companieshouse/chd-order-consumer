@@ -25,6 +25,9 @@ public class LoggingUtils {
     public static final String RETRY_ATTEMPT = "retry_attempt";
     public static final String CHD_ITEM_ORDERED_GROUP_ERROR = "chd_item_ordered_error";
     public static final String ORDER_REFERENCE_NUMBER = "order_reference_number";
+    public static final String ITEM_ID = "item_id";
+    public static final String PAYMENT_REFERENCE = "payment_reference";
+    public static final String COMPANY_NUMBER = "company_number";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 

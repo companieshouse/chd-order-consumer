@@ -14,6 +14,7 @@ import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 import uk.gov.companieshouse.orders.items.ChdItemOrdered;
+import uk.gov.companieshouse.orders.items.Item;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -21,6 +22,11 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.COMPANY_NUMBER;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.ITEM_ID;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.ORDER_REFERENCE_NUMBER;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.PAYMENT_REFERENCE;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.logIfNotNull;
 
 @Service
 public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
@@ -116,21 +122,18 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
      * @param message
      */
     protected void handleMessage(org.springframework.messaging.Message<ChdItemOrdered> message) {
-        ChdItemOrdered msg = message.getPayload();
-
-        // TODO GCI-1594 deal with ChdItemOrdered attributes.
-        final String orderReference = msg.getReference();
-
+        ChdItemOrdered order = message.getPayload();
+        final String orderReference = order.getReference();
         MessageHeaders headers = message.getHeaders();
         String receivedTopic = headers.get(KafkaHeaders.RECEIVED_TOPIC).toString();
         try {
-            logMessageReceived(message, orderReference);
+            logMessageReceived(message, order);
 
             // on successful processing remove counterKey from retryCount
             if (retryCount.containsKey(orderReference)) {
                 resetRetryCount(receivedTopic + "-" + orderReference);
             }
-            logMessageProcessed(message, orderReference);
+            logMessageProcessed(message, order);
         } catch (RetryableErrorException ex) {
             retryMessage(message, orderReference, receivedTopic, ex);
         } catch (Exception x) {
@@ -139,16 +142,16 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
     }
 
     protected void logMessageReceived(org.springframework.messaging.Message<ChdItemOrdered> message,
-                                      String orderReference) {
+                                      ChdItemOrdered order) {
         Map<String, Object> logMap = LoggingUtils.getMessageHeadersAsMap(message);
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.ORDER_REFERENCE_NUMBER, orderReference);
+        populateChdMessageLogMap(order, logMap);
         LoggingUtils.getLogger().info("'chd-item-ordered' message received", logMap);
     }
 
     private void logMessageProcessed(org.springframework.messaging.Message<ChdItemOrdered> message,
-                                     String orderReference) {
+                                     ChdItemOrdered order) {
         Map<String, Object> logMap = LoggingUtils.getMessageHeadersAsMap(message);
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.ORDER_REFERENCE_NUMBER, orderReference);
+        populateChdMessageLogMap(order, logMap);
         LoggingUtils.getLogger().info("'chd-item-ordered' message processing completed", logMap);
     }
 
@@ -185,9 +188,9 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
 
     protected void republishMessageToTopic(String orderReference, String currentTopic, String nextTopic) {
         Map<String, Object> logMap = LoggingUtils.createLogMap();
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.ORDER_REFERENCE_NUMBER, orderReference);
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.CURRENT_TOPIC, currentTopic);
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.NEXT_TOPIC, nextTopic);
+        logIfNotNull(logMap, ORDER_REFERENCE_NUMBER, orderReference);
+        logIfNotNull(logMap, LoggingUtils.CURRENT_TOPIC, currentTopic);
+        logIfNotNull(logMap, LoggingUtils.NEXT_TOPIC, nextTopic);
         LoggingUtils.getLogger().info(String.format(
                 "Republishing message: \"%1$s\" received from topic: \"%2$s\" to topic: \"%3$s\"",
                 orderReference, currentTopic, nextTopic), logMap);
@@ -215,9 +218,9 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
             message.setValue(serializer.toBinary(chdItemOrdered));
         } catch (SerializationException e) {
             Map<String, Object> logMap = LoggingUtils.createLogMap();
-            LoggingUtils.logIfNotNull(logMap, LoggingUtils.MESSAGE, orderReference);
-            LoggingUtils.logIfNotNull(logMap, LoggingUtils.TOPIC, topic);
-            LoggingUtils.logIfNotNull(logMap, LoggingUtils.OFFSET, message.getOffset());
+            logIfNotNull(logMap, LoggingUtils.MESSAGE, orderReference);
+            logIfNotNull(logMap, LoggingUtils.TOPIC, topic);
+            logIfNotNull(logMap, LoggingUtils.OFFSET, message.getOffset());
             LoggingUtils.getLogger().error(String.format("Error serializing message: \"%1$s\" for topic: \"%2$s\"",
                     orderReference, topic), e, logMap);
         }
@@ -265,5 +268,18 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
     @Override
     public void onIdleContainer(Map<TopicPartition, Long> map, ConsumerSeekCallback consumerSeekCallback) {
 
+    }
+
+    /**
+     * Populates the log map provided with key values for the tracking of inbound messages.
+     * @param order the order extracted from the inbound message
+     * @param logMap the log map to populate values from the order with
+     */
+    private void populateChdMessageLogMap(final ChdItemOrdered order, final Map<String, Object> logMap) {
+        logIfNotNull(logMap, ORDER_REFERENCE_NUMBER, order.getReference());
+        logIfNotNull(logMap, PAYMENT_REFERENCE, order.getPaymentReference());
+        final Item firstItem = order.getItem();
+        logIfNotNull(logMap, ITEM_ID, firstItem.getId());
+        logIfNotNull(logMap, COMPANY_NUMBER, firstItem.getCompanyNumber());
     }
 }
