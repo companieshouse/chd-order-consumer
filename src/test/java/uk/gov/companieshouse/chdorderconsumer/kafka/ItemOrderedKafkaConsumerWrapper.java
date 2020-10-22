@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 
 @DirtiesContext
 @Aspect
@@ -30,7 +31,7 @@ public class ItemOrderedKafkaConsumerWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
     private CountDownLatch latch = new CountDownLatch(1);
-    private String orderReference;
+    private String messagePayload;
     private CHConsumerType testType = CHConsumerType.MAIN_CONSUMER;
     @Value("${spring.kafka.bootstrap-servers}")
     private String brokerAddresses;
@@ -80,37 +81,40 @@ public class ItemOrderedKafkaConsumerWrapper {
     @After(value = "execution(* uk.gov.companieshouse.chdorderconsumer.kafka.ItemOrderedKafkaConsumer.*(..)) && args(message)")
     public void afterItemOrderedProcessed(final Message message){
         LOGGER.info("ItemOrderedKafkaConsumer.processChdItemOrderedRetry() @After triggered");
-        this.orderReference = "" + message.getPayload();
+        this.messagePayload = "" + message.getPayload();
         latch.countDown();
     }
 
     CountDownLatch getLatch() { return latch; }
-    String getOrderReference() { return orderReference; }
+    String getMessagePayload() { return messagePayload; }
     void setTestType(CHConsumerType type) { this.testType = type;}
 
     private void setUpTestKafkaItemOrderedProducerAndSendMessageToTopic()
             throws ExecutionException, InterruptedException, SerializationException {
 
+        final ChdItemOrdered order = createOrder();
         if (this.testType == CHConsumerType.MAIN_CONSUMER) {
-            kafkaProducer.sendMessage(createMessage(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC));
+            kafkaProducer.sendMessage(createMessage(order, ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC));
         } else if (this.testType == CHConsumerType.RETRY_CONSUMER) {
-            kafkaProducer.sendMessage(createMessage(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_RETRY));
+            kafkaProducer.sendMessage(createMessage(order, ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_RETRY));
         } else if (this.testType == CHConsumerType.ERROR_CONSUMER) {
-            kafkaProducer.sendMessage(createMessage(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_ERROR));
+            kafkaProducer.sendMessage(createMessage(order, ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_ERROR));
         }
     }
 
-    public uk.gov.companieshouse.kafka.message.Message createMessage(String orderReference, String topic) throws SerializationException {
+    public uk.gov.companieshouse.kafka.message.Message createMessage(final ChdItemOrdered order,
+                                                                     final String orderReference,
+                                                                     final String topic) throws SerializationException {
         final uk.gov.companieshouse.kafka.message.Message message = new uk.gov.companieshouse.kafka.message.Message();
-        AvroSerializer serializer = serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class);
-        ChdItemOrdered chdItemOrdered = new ChdItemOrdered();
+        final AvroSerializer<ChdItemOrdered> serializer =
+                serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class);
 
         // TODO GCI-1594 deal with ChdItemOrdered attributes.
         //chdItemOrdered.setOrderUri(orderUri.trim());
-        chdItemOrdered.setReference(orderReference.trim());
+        order.setReference(orderReference.trim());
 
         message.setKey(CHD_ITEM_ORDERED_KEY_RETRY);
-        message.setValue(serializer.toBinary(chdItemOrdered));
+        message.setValue(serializer.toBinary(order));
         message.setTopic(topic);
         message.setTimestamp(new Date().getTime());
 
