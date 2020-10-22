@@ -122,10 +122,10 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
      * @param message
      */
     protected void handleMessage(org.springframework.messaging.Message<ChdItemOrdered> message) {
-        ChdItemOrdered order = message.getPayload();
+        final ChdItemOrdered order = message.getPayload();
         final String orderReference = order.getReference();
-        MessageHeaders headers = message.getHeaders();
-        String receivedTopic = headers.get(KafkaHeaders.RECEIVED_TOPIC).toString();
+        final MessageHeaders headers = message.getHeaders();
+        final String receivedTopic = headers.get(KafkaHeaders.RECEIVED_TOPIC).toString();
         try {
             logMessageReceived(message, order);
 
@@ -135,7 +135,7 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
             }
             logMessageProcessed(message, order);
         } catch (RetryableErrorException ex) {
-            retryMessage(message, orderReference, receivedTopic, ex);
+            retryMessage(message, order, orderReference, receivedTopic, ex);
         } catch (Exception x) {
             logMessageProcessingFailureNonRecoverable(message, x);
         }
@@ -161,11 +161,13 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
      * to the next topic for failover processing, if retries match or exceed `MAX_RETRY_ATTEMPTS`.
      *
      * @param message
+     * @param order
      * @param orderReference
      * @param receivedTopic
      * @param ex
      */
     private void retryMessage(org.springframework.messaging.Message<ChdItemOrdered> message,
+                              final ChdItemOrdered order,
                               String orderReference, String receivedTopic, RetryableErrorException ex) {
         String nextTopic = (receivedTopic.equals(CHD_ITEM_ORDERED_TOPIC)
                 || receivedTopic.equals(CHD_ITEM_ORDERED_TOPIC_ERROR)) ? CHD_ITEM_ORDERED_TOPIC_RETRY
