@@ -41,13 +41,14 @@ import static org.hamcrest.Matchers.isEmptyOrNullString;
 @EmbeddedKafka
 @TestPropertySource(properties={"uk.gov.companieshouse.chdorderconsumer.error-consumer=true"})
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
+class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
 
     private static final String CHD_ITEM_ORDERED_TOPIC = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";
     private static final String CHD_ITEM_ORDERED_TOPIC_ERROR = "chd-item-ordered-error";
     private static final String CONSUMER_GROUP_MAIN_RETRY = "chd-item-ordered-main-retry";
-    private static final String ORDER_RECEIVED_URI = "/orders/ORD-123456-123456";
+    private static final String ORDER_REFERENCE = "ORD-123456-123456";
+    // TODO GCI-1594 correct expected content and constant name
     private static final String ORDER_RECEIVED_MESSAGE_JSON = "{\"order_uri\": \"/orders/ORD-123456-123456\"}";
 
     @Value("${spring.kafka.bootstrap-servers}")
@@ -104,7 +105,7 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     @DisplayName("chd-item-ordered topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
     void testItemOrderedConsumerReceivesChdItemOrderedMessage1() throws InterruptedException, ExecutionException, SerializationException {
         // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC));
+        kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC));
 
         // Then
         verifyProcessChdItemOrderedNotInvoked(CHConsumerType.MAIN_CONSUMER);
@@ -114,7 +115,7 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     @DisplayName("chd-item-ordered-retry topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
     void testItemOrderedConsumerReceivesChdItemOrderedMessage2Retry() throws InterruptedException, SerializationException, ExecutionException {
         // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_RETRY));
+        kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_RETRY));
 
         // Then
         verifyProcessChdItemOrderedNotInvoked(CHConsumerType.RETRY_CONSUMER);
@@ -123,15 +124,15 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     private void verifyProcessChdItemOrderedNotInvoked(CHConsumerType type) throws InterruptedException {
         consumerWrapper.setTestType(type);
         consumerWrapper.getLatch().await(3000, TimeUnit.MILLISECONDS);
-        final String processedOrderUri = consumerWrapper.getOrderUri();
-        assertThat(processedOrderUri, isEmptyOrNullString());
+        final String processedOrderReference = consumerWrapper.getOrderReference();
+        assertThat(processedOrderReference, isEmptyOrNullString());
     }
 
     @Test
     @DisplayName("chd-item-ordered-error topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is true")
     void testItemOrderedConsumerReceivesChdItemOrderedMessage3Error() throws InterruptedException, ExecutionException, SerializationException {
         // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_ERROR));
+        kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_ERROR));
 
         // Then
         verifyProcessChdItemOrderedInvoked(CHConsumerType.ERROR_CONSUMER);
@@ -140,7 +141,7 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
     private void verifyProcessChdItemOrderedInvoked(CHConsumerType type) throws InterruptedException {
         consumerWrapper.setTestType(type);
         consumerWrapper.getLatch().await(6000, TimeUnit.MILLISECONDS);
-        final String processedOrderUri = consumerWrapper.getOrderUri();
-        assertThat(processedOrderUri, is(equalTo(ORDER_RECEIVED_MESSAGE_JSON)));
+        final String processedOrderReference = consumerWrapper.getOrderReference();
+        assertThat(processedOrderReference, is(equalTo(ORDER_RECEIVED_MESSAGE_JSON)));
     }
 }

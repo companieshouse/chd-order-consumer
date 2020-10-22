@@ -32,8 +32,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ItemOrderedKafkaConsumerTest {
-    private static final String ORDER_RECEIVED_URI = "/orders/ORD-123456-123456";
+class ItemOrderedKafkaConsumerTest {
+    private static final String ORDER_REFERENCE = "ORD-123456-123456";
     private static final String CHD_ITEM_ORDERED_TOPIC = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_KEY = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";
@@ -50,62 +50,62 @@ public class ItemOrderedKafkaConsumerTest {
     @Mock
     private AvroSerializer serializer;
     @Captor
-    ArgumentCaptor<String> orderUriArgument;
+    ArgumentCaptor<String> orderReferenceArgument;
     @Captor
     ArgumentCaptor<String> currentTopicArgument;
     @Captor
     ArgumentCaptor<String> nextTopicArgument;
 
     @Test
-    public void createRetryMessageBuildsMessageSuccessfully() {
+    void createRetryMessageBuildsMessageSuccessfully() {
         // Given & When
         ItemOrderedKafkaConsumer consumerUnderTest =
                 new ItemOrderedKafkaConsumer(new SerializerFactory(),
                         new ItemOrderedKafkaProducer(),
                         new KafkaListenerEndpointRegistry());
-        Message actualMessage = consumerUnderTest.createRetryMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC);
+        Message actualMessage = consumerUnderTest.createRetryMessage(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC);
         byte[] actualMessageRawValue    = actualMessage.getValue();
         // Then
         ChdItemOrderedDeserializer deserializer = new ChdItemOrderedDeserializer();
         String actualChdItemOrdered = (String) deserializer.deserialize(CHD_ITEM_ORDERED_TOPIC, actualMessageRawValue).get(0);
-        Assert.assertThat(actualChdItemOrdered, Matchers.is(ORDER_RECEIVED_URI));
+        Assert.assertThat(actualChdItemOrdered, Matchers.is(ORDER_REFERENCE));
     }
 
     @Test
-    public void republishMessageToRetryTopicRunsSuccessfully()
+    void republishMessageToRetryTopicRunsSuccessfully()
             throws ExecutionException, InterruptedException, SerializationException {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
-        kafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
+        kafkaConsumer.republishMessageToTopic(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
         // Then
         verify(kafkaProducer, times(1)).sendMessage(any());
     }
 
     @Test
-    public void republishMessageToRetryTopicThrowsSerializationException()
+    void republishMessageToRetryTopicThrowsSerializationException()
             throws ExecutionException, InterruptedException, SerializationException {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenThrow(SerializationException.class);
-        kafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
+        kafkaConsumer.republishMessageToTopic(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC, CHD_ITEM_ORDERED_TOPIC_RETRY);
         // Then
         verify(kafkaProducer, times(1)).sendMessage(any());
     }
 
     @Test
-    public void republishMessageToErrorTopicRunsSuccessfully()
+    void republishMessageToErrorTopicRunsSuccessfully()
             throws ExecutionException, InterruptedException, SerializationException {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
-        kafkaConsumer.republishMessageToTopic(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_RETRY, CHD_ITEM_ORDERED_TOPIC_ERROR);
+        kafkaConsumer.republishMessageToTopic(ORDER_REFERENCE, CHD_ITEM_ORDERED_TOPIC_RETRY, CHD_ITEM_ORDERED_TOPIC_ERROR);
         // Then
         verify(kafkaProducer, times(1)).sendMessage(any());
     }
 
     @Test
-    public void republishMessageSuccessfullyCalledForFirstMainMessageOnRetryableErrorException()
+    void republishMessageSuccessfullyCalledForFirstMainMessageOnRetryableErrorException()
             throws SerializationException {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
@@ -113,15 +113,15 @@ public class ItemOrderedKafkaConsumerTest {
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).logMessageReceived(any(), any());
         kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC));
         // Then
-        verify(kafkaConsumer, times(1)).republishMessageToTopic(orderUriArgument.capture(),
+        verify(kafkaConsumer, times(1)).republishMessageToTopic(orderReferenceArgument.capture(),
                 currentTopicArgument.capture(), nextTopicArgument.capture());
-        Assert.assertEquals(ORDER_RECEIVED_URI, orderUriArgument.getValue());
+        Assert.assertEquals(ORDER_REFERENCE, orderReferenceArgument.getValue());
         Assert.assertEquals(CHD_ITEM_ORDERED_TOPIC, currentTopicArgument.getValue());
         Assert.assertEquals(CHD_ITEM_ORDERED_TOPIC_RETRY, nextTopicArgument.getValue());
     }
 
     @Test
-    public void republishMessageNotCalledForFirstRetryMessageOnRetryableErrorException() {
+    void republishMessageNotCalledForFirstRetryMessageOnRetryableErrorException() {
         // Given & When
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).doNothing().when(kafkaConsumer).logMessageReceived(any(), any());
         kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC_RETRY));
@@ -130,7 +130,7 @@ public class ItemOrderedKafkaConsumerTest {
     }
 
     @Test
-    public void republishMessageNotCalledForFirstErrorMessageOnRetryableErrorException() {
+    void republishMessageNotCalledForFirstErrorMessageOnRetryableErrorException() {
         // Given & When
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).doNothing().when(kafkaConsumer).logMessageReceived(any(), any());
         kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC_ERROR));
@@ -139,7 +139,7 @@ public class ItemOrderedKafkaConsumerTest {
     }
 
     @Test
-    public void mainListenerExceptionIsCorrectlyHandled() {
+    void mainListenerExceptionIsCorrectlyHandled() {
         // Given & When
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processChdItemOrdered(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
@@ -152,7 +152,7 @@ public class ItemOrderedKafkaConsumerTest {
     }
 
     @Test
-    public void retryListenerExceptionIsCorrectlyHandled() {
+    void retryListenerExceptionIsCorrectlyHandled() {
         // Given & When
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processChdItemOrderedRetry(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
@@ -165,7 +165,7 @@ public class ItemOrderedKafkaConsumerTest {
     }
 
     @Test
-    public void errorListenerExceptionIsCorrectlyHandled() {
+    void errorListenerExceptionIsCorrectlyHandled() {
         // Given & When
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processChdItemOrderedError(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
@@ -185,7 +185,7 @@ public class ItemOrderedKafkaConsumerTest {
 
                 // TODO GCI-1594 deal with ChdItemOrdered attributes.
                 //chdItemOrdered.setOrderUri(ORDER_RECEIVED_URI);
-                chdItemOrdered.setReference(ORDER_RECEIVED_URI);
+                chdItemOrdered.setReference(ORDER_REFERENCE);
 
                 return chdItemOrdered;
             }
