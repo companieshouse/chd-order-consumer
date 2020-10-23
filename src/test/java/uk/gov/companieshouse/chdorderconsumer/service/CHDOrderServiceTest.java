@@ -44,72 +44,61 @@ public class CHDOrderServiceTest {
 
     private static final String POST_MISSING_IMAGE_CHD_ORDER_URI = "/chd-order-api/missing-image-deliveries";
     private static final String POST_MISSING_IMAGE_CHD_ORDER_INCORRECT_URI = "/chd-order-api/missing-image-delivery";
-    private static final LocalDateTime DEFAULT_DATE = LocalDateTime.of(2019, 1, 1, 0, 0, 0);
+    private static final MissingImageDeliveryRequestApi MISSING_IMAGE_DELIVERY_REQUEST_API;
+    static {
+        MISSING_IMAGE_DELIVERY_REQUEST_API = new MissingImageDeliveryRequestApi();
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setCompanyName("Test");
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setCompanyNumber("123");
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryCategory("Test");
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryDate("25-10-2018");
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryDescription("Test");
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setId("Test");
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setItemCost("Test");
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setOrderedAt(LocalDateTime.now());
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setPaymentReference("Test");
+    }
 
     @BeforeEach
     void init() {
-        MissingImageDeliveryRequestApi missingImageDeliveryRequestApi = createMissingImageDeliveryRequestApi();
-
         when(mockApiClientService.getInternalApiClient()).thenReturn(mockApiClient);
         when(mockApiClient.privateChdOrderResourceHandler()).thenReturn(mockPrivateChdOrderResourceHandler);
     }
 
     @Test
     void createCHDOrderSuccessful() throws ApiErrorResponseException, URIValidationException {
-        MissingImageDeliveryRequestApi missingImageDeliveryRequestApi = createMissingImageDeliveryRequestApi();
-
         when(mockPrivateChdOrderResourceHandler
-            .postChdOrder(POST_MISSING_IMAGE_CHD_ORDER_URI, missingImageDeliveryRequestApi))
+            .postChdOrder(POST_MISSING_IMAGE_CHD_ORDER_URI, MISSING_IMAGE_DELIVERY_REQUEST_API))
             .thenReturn(mockChdOrdersPost);
         when(mockChdOrdersPost.execute()).thenReturn(mockApiResponse);
 
         ApiResponse<MissingImageDeliveryRequestApi> response
-            = chdOrderService.createCHDOrder(POST_MISSING_IMAGE_CHD_ORDER_URI, missingImageDeliveryRequestApi);
+            = chdOrderService.createCHDOrder(POST_MISSING_IMAGE_CHD_ORDER_URI, MISSING_IMAGE_DELIVERY_REQUEST_API);
 
         assertEquals(mockApiResponse, response);
     }
 
     @Test
     void createCHDOrderThrowsUriValidationException() throws ApiErrorResponseException, URIValidationException {
-        MissingImageDeliveryRequestApi missingImageDeliveryRequestApi = createMissingImageDeliveryRequestApi();
-
         when(mockPrivateChdOrderResourceHandler
-            .postChdOrder(POST_MISSING_IMAGE_CHD_ORDER_INCORRECT_URI, missingImageDeliveryRequestApi))
+            .postChdOrder(POST_MISSING_IMAGE_CHD_ORDER_INCORRECT_URI, MISSING_IMAGE_DELIVERY_REQUEST_API))
             .thenReturn(mockChdOrdersPost);
         when(mockChdOrdersPost.execute()).thenThrow(new URIValidationException("Test exception"));
 
         ServiceException exception =
             assertThrows(ServiceException.class, () -> chdOrderService.createCHDOrder(
-                POST_MISSING_IMAGE_CHD_ORDER_INCORRECT_URI, missingImageDeliveryRequestApi));
+                POST_MISSING_IMAGE_CHD_ORDER_INCORRECT_URI, MISSING_IMAGE_DELIVERY_REQUEST_API));
         assertEquals("Unrecognised uri pattern for: " + POST_MISSING_IMAGE_CHD_ORDER_INCORRECT_URI,
             exception.getMessage());
     }
 
     @Test
     void createCHDOrderThrowsApiResponseException() throws ApiErrorResponseException, URIValidationException {
-        MissingImageDeliveryRequestApi missingImageDeliveryRequestApi = createMissingImageDeliveryRequestApi();
-
         when(mockPrivateChdOrderResourceHandler
-            .postChdOrder(POST_MISSING_IMAGE_CHD_ORDER_URI, missingImageDeliveryRequestApi))
+            .postChdOrder(POST_MISSING_IMAGE_CHD_ORDER_URI, MISSING_IMAGE_DELIVERY_REQUEST_API))
             .thenReturn(mockChdOrdersPost);
         when(mockChdOrdersPost.execute()).thenThrow(ApiErrorResponseException.class);
 
         assertThrows(ServiceException.class, () -> chdOrderService.createCHDOrder(
-            POST_MISSING_IMAGE_CHD_ORDER_URI, missingImageDeliveryRequestApi));
-    }
-
-    private MissingImageDeliveryRequestApi createMissingImageDeliveryRequestApi() {
-        MissingImageDeliveryRequestApi missingImageDeliveryRequestApi = new MissingImageDeliveryRequestApi();
-        missingImageDeliveryRequestApi.setId("id");
-        missingImageDeliveryRequestApi.setCompanyName("companyName");
-        missingImageDeliveryRequestApi.setCompanyNumber("00000000");
-        missingImageDeliveryRequestApi.setOrderedAt(DEFAULT_DATE);
-        missingImageDeliveryRequestApi.setPaymentReference("paymentReference");
-        missingImageDeliveryRequestApi.setFilingHistoryCategory("filingHistoryCategory");
-        missingImageDeliveryRequestApi.setFilingHistoryDescription("filingHistoryDescription");
-        missingImageDeliveryRequestApi.setFilingHistoryDate("2019-01-01");
-        missingImageDeliveryRequestApi.setItemCost("3");
-
-        return missingImageDeliveryRequestApi;
+            POST_MISSING_IMAGE_CHD_ORDER_URI, MISSING_IMAGE_DELIVERY_REQUEST_API));
     }
 }
