@@ -37,7 +37,6 @@ public class TestUtils {
         orderedBy.setEmail("demo@ch.gov.uk");
         orderedBy.setId("4Y2VkZWVlMzhlZWFjY2M4MzQ3M1234");
         order.setOrderedBy(orderedBy);
-// TODO GCI-1594 Check product type is conveyed correctly to this consumer
         final ItemCosts costs = new ItemCosts("0", "3", "3", "missing-image-delivery-accounts");
         item.setItemCosts(singletonList(costs));
         final Map<String, String> options = new HashMap<>();
