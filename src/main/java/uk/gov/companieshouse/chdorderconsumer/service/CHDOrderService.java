@@ -1,31 +1,36 @@
 package uk.gov.companieshouse.chdorderconsumer.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriTemplate;
-import uk.gov.companieshouse.api.ApiClient;
+import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
+import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.api.model.order.chd.MissingImageDeliveryRequestApi;
+import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
 
 @Service
 public class CHDOrderService {
 
     private final ApiClientService apiClientService;
 
-    private static final String POST_MISSING_IMAGE_CHD_ORDER_URI = "/chd-order-api/missing-image-deliveries";
-
     public CHDOrderService(final ApiClientService apiClientService) {
         this.apiClientService = apiClientService;
     }
 
-    public void createCHDOrder() {
+    public ApiResponse<MissingImageDeliveryRequestApi> createCHDOrder(String uri,
+        MissingImageDeliveryRequestApi missingImageDeliveryRequestApi) {
 
-        final ApiClient apiClient = apiClientService.getInternalApiClient();
-        final String uri = POST_MISSING_IMAGE_CHD_ORDER_URI;
+        final InternalApiClient apiClient = apiClientService.getInternalApiClient();
 
-        // Extract the contents of the message and populate the DTO
-
-        // POST DTO
-
-        // Handle Response
-
-        // Make sure to add plenty of logging
+        try {
+            return apiClient.privateChdOrderResourceHandler()
+                    .postChdOrder(uri, missingImageDeliveryRequestApi)
+                    .execute();
+        } catch (URIValidationException ex) {
+            throw new ServiceException("Unrecognised uri pattern for: " + uri);
+        } catch (ApiErrorResponseException ex) {
+            throw new ServiceException("API Response Error for : "
+                + missingImageDeliveryRequestApi.getId() + ", Error response: " + ex.getStatusCode());
+        }
     }
 }
