@@ -14,7 +14,7 @@ import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 import java.io.IOException;
 
 @ExtendWith(MockitoExtension.class)
-public class ChdItemOrderedDeserializerTest {
+class ChdItemOrderedDeserializerTest {
     @InjectMocks
     private ChdItemOrderedDeserializer deserializer;
     @Mock
@@ -23,7 +23,7 @@ public class ChdItemOrderedDeserializerTest {
     private DatumReader<ChdItemOrdered> datumReader;
 
     @Test
-    public void deserializeThrowsSerializationException() throws IOException {
+    void deserializeThrowsSerializationException() throws IOException {
         byte[] testData = new String("Test data").getBytes();
 
         Assertions.assertThrows(SerializationException.class, () -> deserializer.deserialize("chd-item-ordered", testData));

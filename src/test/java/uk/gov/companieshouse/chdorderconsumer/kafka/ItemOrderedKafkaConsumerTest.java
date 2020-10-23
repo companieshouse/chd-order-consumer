@@ -51,6 +51,8 @@ class ItemOrderedKafkaConsumerTest {
     private SerializerFactory serializerFactory;
     @Mock
     private AvroSerializer serializer;
+    @Mock
+    private org.springframework.messaging.Message<ChdItemOrdered> message;
     @Captor
     ArgumentCaptor<String> orderReferenceArgument;
     @Captor
@@ -160,7 +162,7 @@ class ItemOrderedKafkaConsumerTest {
         // Given & When
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processChdItemOrdered(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
-            kafkaConsumer.processChdItemOrdered(any());
+            kafkaConsumer.processChdItemOrdered(message);
         });
         // Then
         String actualMessage = exception.getMessage();
@@ -173,7 +175,7 @@ class ItemOrderedKafkaConsumerTest {
         // Given & When
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processChdItemOrderedRetry(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
-            kafkaConsumer.processChdItemOrderedRetry(any());
+            kafkaConsumer.processChdItemOrderedRetry(message);
         });
         // Then
         String actualMessage = exception.getMessage();
@@ -186,7 +188,7 @@ class ItemOrderedKafkaConsumerTest {
         // Given & When
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).processChdItemOrderedError(any());
         RetryableErrorException exception = Assertions.assertThrows(RetryableErrorException.class, () -> {
-            kafkaConsumer.processChdItemOrderedError(any());
+            kafkaConsumer.processChdItemOrderedError(message);
         });
         // Then
         String actualMessage = exception.getMessage();
