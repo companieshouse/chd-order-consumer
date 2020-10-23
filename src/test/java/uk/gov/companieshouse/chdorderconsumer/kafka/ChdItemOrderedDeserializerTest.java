@@ -9,21 +9,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.orders.OrderReceived;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 import java.io.IOException;
 
 @ExtendWith(MockitoExtension.class)
-public class OrderReceivedDeserializerTest {
+class ChdItemOrderedDeserializerTest {
     @InjectMocks
-    private OrderReceivedDeserializer deserializer;
+    private ChdItemOrderedDeserializer deserializer;
     @Mock
     private BinaryDecoder binaryDecoder;
     @Mock
-    private DatumReader<OrderReceived> datumReader;
+    private DatumReader<ChdItemOrdered> datumReader;
 
     @Test
-    public void deserializeThrowsSerializationException() throws IOException {
+    void deserializeThrowsSerializationException() throws IOException {
         byte[] testData = new String("Test data").getBytes();
 
         Assertions.assertThrows(SerializationException.class, () -> deserializer.deserialize("chd-item-ordered", testData));

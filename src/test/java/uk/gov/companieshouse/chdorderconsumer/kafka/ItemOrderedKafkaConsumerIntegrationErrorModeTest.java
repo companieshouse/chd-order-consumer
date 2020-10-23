@@ -21,34 +21,32 @@ import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
-import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.assertJsonsEqualIgnoringFieldOrdering;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 
 @SpringBootTest
 @DirtiesContext
 @EmbeddedKafka
 @TestPropertySource(properties={"uk.gov.companieshouse.chdorderconsumer.error-consumer=true"})
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
+class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
 
     private static final String CHD_ITEM_ORDERED_TOPIC = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";
     private static final String CHD_ITEM_ORDERED_TOPIC_ERROR = "chd-item-ordered-error";
     private static final String CONSUMER_GROUP_MAIN_RETRY = "chd-item-ordered-main-retry";
-    private static final String ORDER_RECEIVED_URI = "/orders/ORD-123456-123456";
-    private static final String ORDER_RECEIVED_MESSAGE_JSON = "{\"order_uri\": \"/orders/ORD-123456-123456\"}";
+    private static final String ORDER_REFERENCE = "ORD-123456-123456";
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String brokerAddresses;
@@ -102,45 +100,50 @@ public class ItemOrderedKafkaConsumerIntegrationErrorModeTest {
 
     @Test
     @DisplayName("chd-item-ordered topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
-    void testItemOrderedConsumerReceivesOrderReceivedMessage1() throws InterruptedException, ExecutionException, SerializationException {
+    void testItemOrderedConsumerReceivesChdItemOrderedMessage1() throws Exception {
         // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC));
+        kafkaProducer.sendMessage(consumerWrapper.createMessage(createOrder(), CHD_ITEM_ORDERED_TOPIC));
 
         // Then
-        verifyProcessOrderReceivedNotInvoked(CHConsumerType.MAIN_CONSUMER);
+        verifyProcessChdItemOrderedNotInvoked(CHConsumerType.MAIN_CONSUMER);
     }
 
     @Test
     @DisplayName("chd-item-ordered-retry topic consumer does not receive message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER)is true")
-    void testItemOrderedConsumerReceivesOrderReceivedMessage2Retry() throws InterruptedException, SerializationException, ExecutionException {
+    void testItemOrderedConsumerReceivesChdItemOrderedMessage2Retry() throws Exception {
         // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_RETRY));
+        kafkaProducer.sendMessage(consumerWrapper.createMessage(createOrder(), CHD_ITEM_ORDERED_TOPIC_RETRY));
 
         // Then
-        verifyProcessOrderReceivedNotInvoked(CHConsumerType.RETRY_CONSUMER);
+        verifyProcessChdItemOrderedNotInvoked(CHConsumerType.RETRY_CONSUMER);
     }
 
-    private void verifyProcessOrderReceivedNotInvoked(CHConsumerType type) throws InterruptedException {
+    private void verifyProcessChdItemOrderedNotInvoked(CHConsumerType type) throws InterruptedException {
         consumerWrapper.setTestType(type);
         consumerWrapper.getLatch().await(3000, TimeUnit.MILLISECONDS);
-        final String processedOrderUri = consumerWrapper.getOrderUri();
-        assertThat(processedOrderUri, isEmptyOrNullString());
+        final String processedOrderReference = consumerWrapper.getMessagePayload();
+        assertThat(processedOrderReference, isEmptyOrNullString());
     }
 
     @Test
     @DisplayName("chd-item-ordered-error topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is true")
-    void testItemOrderedConsumerReceivesOrderReceivedMessage3Error() throws InterruptedException, ExecutionException, SerializationException {
+    void testItemOrderedConsumerReceivesChdItemOrderedMessage3Error() throws Exception {
+
+        // Given
+        final ChdItemOrdered order = createOrder();
+
         // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(ORDER_RECEIVED_URI, CHD_ITEM_ORDERED_TOPIC_ERROR));
+        kafkaProducer.sendMessage(consumerWrapper.createMessage(order, CHD_ITEM_ORDERED_TOPIC_ERROR));
 
         // Then
-        verifyProcessOrderReceivedInvoked(CHConsumerType.ERROR_CONSUMER);
+        verifyProcessChdItemOrderedInvoked(order, CHConsumerType.ERROR_CONSUMER);
     }
 
-    private void verifyProcessOrderReceivedInvoked(CHConsumerType type) throws InterruptedException {
+    private void verifyProcessChdItemOrderedInvoked(final ChdItemOrdered order,
+                                                    final CHConsumerType type) throws Exception {
         consumerWrapper.setTestType(type);
         consumerWrapper.getLatch().await(6000, TimeUnit.MILLISECONDS);
-        final String processedOrderUri = consumerWrapper.getOrderUri();
-        assertThat(processedOrderUri, is(equalTo(ORDER_RECEIVED_MESSAGE_JSON)));
+        final String messagePayload = consumerWrapper.getMessagePayload();
+        assertJsonsEqualIgnoringFieldOrdering(messagePayload, order.toString());
     }
 }

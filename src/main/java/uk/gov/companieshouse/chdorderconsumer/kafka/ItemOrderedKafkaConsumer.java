@@ -13,7 +13,8 @@ import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
-import uk.gov.companieshouse.orders.OrderReceived;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
+import uk.gov.companieshouse.orders.items.Item;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -21,6 +22,11 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.COMPANY_NUMBER;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.ITEM_ID;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.ORDER_REFERENCE_NUMBER;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.PAYMENT_REFERENCE;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.logIfNotNull;
 
 @Service
 public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
@@ -63,7 +69,7 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
             topics = CHD_ITEM_ORDERED_TOPIC,
             autoStartup = "#{!${uk.gov.companieshouse.chdorderconsumer.error-consumer}}",
             containerFactory = "kafkaListenerContainerFactory")
-    public void processOrderReceived(org.springframework.messaging.Message<OrderReceived> message) {
+    public void processChdItemOrdered(org.springframework.messaging.Message<ChdItemOrdered> message) {
         handleMessage(message);
     }
 
@@ -76,8 +82,8 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
             topics = CHD_ITEM_ORDERED_TOPIC_RETRY,
             autoStartup = "#{!${uk.gov.companieshouse.chdorderconsumer.error-consumer}}",
             containerFactory = "kafkaListenerContainerFactory")
-    public void processOrderReceivedRetry(
-            org.springframework.messaging.Message<OrderReceived> message) {
+    public void processChdItemOrderedRetry(
+            org.springframework.messaging.Message<ChdItemOrdered> message) {
         handleMessage(message);
     }
 
@@ -95,8 +101,8 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
             topics = CHD_ITEM_ORDERED_TOPIC_ERROR,
             autoStartup = "${uk.gov.companieshouse.chdorderconsumer.error-consumer}",
             containerFactory = "kafkaListenerContainerFactory")
-    public void processOrderReceivedError(
-            org.springframework.messaging.Message<OrderReceived> message) {
+    public void processChdItemOrderedError(
+            org.springframework.messaging.Message<ChdItemOrdered> message) {
         long offset = Long.parseLong("" + message.getHeaders().get("kafka_offset"));
         if (offset <= errorRecoveryOffset) {
             handleMessage(message);
@@ -115,37 +121,37 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
      *
      * @param message
      */
-    protected void handleMessage(org.springframework.messaging.Message<OrderReceived> message) {
-        OrderReceived msg = message.getPayload();
-        String orderReceivedUri = msg.getOrderUri();
-        MessageHeaders headers = message.getHeaders();
-        String receivedTopic = headers.get(KafkaHeaders.RECEIVED_TOPIC).toString();
+    protected void handleMessage(org.springframework.messaging.Message<ChdItemOrdered> message) {
+        final ChdItemOrdered order = message.getPayload();
+        final String orderReference = order.getReference();
+        final MessageHeaders headers = message.getHeaders();
+        final String receivedTopic = headers.get(KafkaHeaders.RECEIVED_TOPIC).toString();
         try {
-            logMessageReceived(message, orderReceivedUri);
+            logMessageReceived(message, order);
 
             // on successful processing remove counterKey from retryCount
-            if (retryCount.containsKey(orderReceivedUri)) {
-                resetRetryCount(receivedTopic + "-" + orderReceivedUri);
+            if (retryCount.containsKey(orderReference)) {
+                resetRetryCount(receivedTopic + "-" + orderReference);
             }
-            logMessageProcessed(message, orderReceivedUri);
+            logMessageProcessed(message, order);
         } catch (RetryableErrorException ex) {
-            retryMessage(message, orderReceivedUri, receivedTopic, ex);
+            retryMessage(message, order, orderReference, receivedTopic, ex);
         } catch (Exception x) {
             logMessageProcessingFailureNonRecoverable(message, x);
         }
     }
 
-    protected void logMessageReceived(org.springframework.messaging.Message<OrderReceived> message,
-                                      String orderUri) {
+    protected void logMessageReceived(org.springframework.messaging.Message<ChdItemOrdered> message,
+                                      ChdItemOrdered order) {
         Map<String, Object> logMap = LoggingUtils.getMessageHeadersAsMap(message);
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.ORDER_URI, orderUri);
+        populateChdMessageLogMap(order, logMap);
         LoggingUtils.getLogger().info("'chd-item-ordered' message received", logMap);
     }
 
-    private void logMessageProcessed(org.springframework.messaging.Message<OrderReceived> message,
-                                     String orderUri) {
+    private void logMessageProcessed(org.springframework.messaging.Message<ChdItemOrdered> message,
+                                     ChdItemOrdered order) {
         Map<String, Object> logMap = LoggingUtils.getMessageHeadersAsMap(message);
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.ORDER_URI, orderUri);
+        populateChdMessageLogMap(order, logMap);
         LoggingUtils.getLogger().info("'chd-item-ordered' message processing completed", logMap);
     }
 
@@ -155,20 +161,22 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
      * to the next topic for failover processing, if retries match or exceed `MAX_RETRY_ATTEMPTS`.
      *
      * @param message
-     * @param orderReceivedUri
+     * @param order
+     * @param orderReference
      * @param receivedTopic
      * @param ex
      */
-    private void retryMessage(org.springframework.messaging.Message<OrderReceived> message,
-                              String orderReceivedUri, String receivedTopic, RetryableErrorException ex) {
+    private void retryMessage(org.springframework.messaging.Message<ChdItemOrdered> message,
+                              final ChdItemOrdered order,
+                              String orderReference, String receivedTopic, RetryableErrorException ex) {
         String nextTopic = (receivedTopic.equals(CHD_ITEM_ORDERED_TOPIC)
                 || receivedTopic.equals(CHD_ITEM_ORDERED_TOPIC_ERROR)) ? CHD_ITEM_ORDERED_TOPIC_RETRY
                 : CHD_ITEM_ORDERED_TOPIC_ERROR;
-        String counterKey = receivedTopic + "-" + orderReceivedUri;
+        String counterKey = receivedTopic + "-" + orderReference;
 
         if (receivedTopic.equals(CHD_ITEM_ORDERED_TOPIC)
                 || retryCount.getOrDefault(counterKey, 1) >= MAX_RETRY_ATTEMPTS) {
-            republishMessageToTopic(orderReceivedUri, receivedTopic, nextTopic);
+            republishMessageToTopic(order, orderReference, receivedTopic, nextTopic);
             if (!receivedTopic.equals(CHD_ITEM_ORDERED_TOPIC)) {
                 resetRetryCount(counterKey);
             }
@@ -180,42 +188,44 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
         }
     }
 
-    protected void republishMessageToTopic(String orderUri, String currentTopic, String nextTopic) {
+    protected void republishMessageToTopic(final ChdItemOrdered order,
+                                           final String orderReference,
+                                           final String currentTopic,
+                                           final String nextTopic) {
         Map<String, Object> logMap = LoggingUtils.createLogMap();
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.ORDER_URI, orderUri);
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.CURRENT_TOPIC, currentTopic);
-        LoggingUtils.logIfNotNull(logMap, LoggingUtils.NEXT_TOPIC, nextTopic);
+        logIfNotNull(logMap, ORDER_REFERENCE_NUMBER, orderReference);
+        logIfNotNull(logMap, LoggingUtils.CURRENT_TOPIC, currentTopic);
+        logIfNotNull(logMap, LoggingUtils.NEXT_TOPIC, nextTopic);
         LoggingUtils.getLogger().info(String.format(
                 "Republishing message: \"%1$s\" received from topic: \"%2$s\" to topic: \"%3$s\"",
-                orderUri, currentTopic, nextTopic), logMap);
+                orderReference, currentTopic, nextTopic), logMap);
         try {
-            kafkaProducer.sendMessage(createRetryMessage(orderUri, nextTopic));
+            kafkaProducer.sendMessage(createRetryMessage(order, orderReference, nextTopic));
         } catch (ExecutionException | InterruptedException e) {
             LoggingUtils.getLogger().error(String.format("Error sending message: \"%1$s\" to topic: \"%2$s\"",
-                    orderUri, nextTopic), e, logMap);
+                    orderReference, nextTopic), e, logMap);
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
         }
     }
 
-    protected Message createRetryMessage(String orderUri, String topic) {
+    protected Message createRetryMessage(final ChdItemOrdered order,
+                                         final String orderReference,
+                                         final String topic) {
         final Message message = new Message();
-        AvroSerializer serializer =
-                serializerFactory.getGenericRecordSerializer(OrderReceived.class);
-        OrderReceived orderReceived = new OrderReceived();
-        orderReceived.setOrderUri(orderUri.trim());
-
+        final AvroSerializer<ChdItemOrdered> serializer =
+                serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class);
         message.setKey(CHD_ITEM_ORDERED_KEY_RETRY);
         try {
-            message.setValue(serializer.toBinary(orderReceived));
+            message.setValue(serializer.toBinary(order));
         } catch (SerializationException e) {
             Map<String, Object> logMap = LoggingUtils.createLogMap();
-            LoggingUtils.logIfNotNull(logMap, LoggingUtils.MESSAGE, orderUri);
-            LoggingUtils.logIfNotNull(logMap, LoggingUtils.TOPIC, topic);
-            LoggingUtils.logIfNotNull(logMap, LoggingUtils.OFFSET, message.getOffset());
+            logIfNotNull(logMap, LoggingUtils.MESSAGE, orderReference);
+            logIfNotNull(logMap, LoggingUtils.TOPIC, topic);
+            logIfNotNull(logMap, LoggingUtils.OFFSET, message.getOffset());
             LoggingUtils.getLogger().error(String.format("Error serializing message: \"%1$s\" for topic: \"%2$s\"",
-                    orderUri, topic), e, logMap);
+                    orderReference, topic), e, logMap);
         }
         message.setTopic(topic);
         message.setTimestamp(new Date().getTime());
@@ -224,14 +234,14 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
     }
 
     protected void logMessageProcessingFailureNonRecoverable(
-            org.springframework.messaging.Message<OrderReceived> message, Exception exception) {
+            org.springframework.messaging.Message<ChdItemOrdered> message, Exception exception) {
         Map<String, Object> logMap = LoggingUtils.getMessageHeadersAsMap(message);
         LoggingUtils.getLogger().error("'chd-item-ordered' message processing failed with a non-recoverable exception",
                 exception, logMap);
     }
 
     protected void logMessageProcessingFailureRecoverable(
-            org.springframework.messaging.Message<OrderReceived> message, int attempt,
+            org.springframework.messaging.Message<ChdItemOrdered> message, int attempt,
             Exception exception) {
         Map<String, Object> logMap = LoggingUtils.getMessageHeadersAsMap(message);
         logMap.put(LoggingUtils.RETRY_ATTEMPT, attempt);
@@ -261,5 +271,18 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
     @Override
     public void onIdleContainer(Map<TopicPartition, Long> map, ConsumerSeekCallback consumerSeekCallback) {
 
+    }
+
+    /**
+     * Populates the log map provided with key values for the tracking of inbound messages.
+     * @param order the order extracted from the inbound message
+     * @param logMap the log map to populate values from the order with
+     */
+    private void populateChdMessageLogMap(final ChdItemOrdered order, final Map<String, Object> logMap) {
+        logIfNotNull(logMap, ORDER_REFERENCE_NUMBER, order.getReference());
+        logIfNotNull(logMap, PAYMENT_REFERENCE, order.getPaymentReference());
+        final Item firstItem = order.getItem();
+        logIfNotNull(logMap, ITEM_ID, firstItem.getId());
+        logIfNotNull(logMap, COMPANY_NUMBER, firstItem.getCompanyNumber());
     }
 }
