@@ -23,7 +23,7 @@
         <hamcrest-all-version>1.3</hamcrest-all-version>
         <start-class>uk.gov.companieshouse.chdorderconsumer.ChdOrderConsumerApplication</start-class>
         <structured-logging.version>1.9.0</structured-logging.version>
-        <kafka-models.version>1.0.16</kafka-models.version>
+        <kafka-models.version>1.0.17</kafka-models.version>
         <environment-reader-library.version>1.3.6</environment-reader-library.version>
         <system-rules-version>1.17.2</system-rules-version>
         <ch-kafka.version>1.4.2</ch-kafka.version>
