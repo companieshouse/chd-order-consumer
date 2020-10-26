@@ -30,7 +30,7 @@ public class CHDOrderService {
             throw new ServiceException("Unrecognised uri pattern for: " + uri);
         } catch (ApiErrorResponseException ex) {
             throw new ServiceException("API Response Error for : "
-                + missingImageDeliveryRequestApi.getId() + ", Error response: " + ex.getStatusCode());
+                + missingImageDeliveryRequestApi.getId() + ", Error response: " + ex.toString());
         }
     }
 }

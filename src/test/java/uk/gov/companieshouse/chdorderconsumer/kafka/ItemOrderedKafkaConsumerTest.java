@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.messaging.MessageHeaders;
 import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
+import uk.gov.companieshouse.chdorderconsumer.service.ItemOrderedProcessorService;
 import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
@@ -53,6 +54,8 @@ class ItemOrderedKafkaConsumerTest {
     private AvroSerializer serializer;
     @Mock
     private org.springframework.messaging.Message<ChdItemOrdered> message;
+    @Mock
+    private ItemOrderedProcessorService processor;
     @Captor
     ArgumentCaptor<String> orderReferenceArgument;
     @Captor
@@ -66,7 +69,7 @@ class ItemOrderedKafkaConsumerTest {
         final ItemOrderedKafkaConsumer consumerUnderTest =
                 new ItemOrderedKafkaConsumer(new SerializerFactory(),
                         new ItemOrderedKafkaProducer(),
-                        new KafkaListenerEndpointRegistry());
+                        new KafkaListenerEndpointRegistry(), processor);
         final ChdItemOrdered originalOrder = createOrder();
 
         // When
