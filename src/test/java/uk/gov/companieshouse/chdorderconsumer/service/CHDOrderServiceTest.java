@@ -49,6 +49,7 @@ public class CHDOrderServiceTest {
         MISSING_IMAGE_DELIVERY_REQUEST_API = new MissingImageDeliveryRequestApi();
         MISSING_IMAGE_DELIVERY_REQUEST_API.setCompanyName("Test");
         MISSING_IMAGE_DELIVERY_REQUEST_API.setCompanyNumber("123");
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryType("TestType");
         MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryCategory("Test");
         MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryDate("25-10-2018");
         MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryDescription("Test");
