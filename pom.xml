@@ -28,7 +28,7 @@
         <system-rules-version>1.17.2</system-rules-version>
         <ch-kafka.version>1.4.2</ch-kafka.version>
         <api-sdk-manager-java-library.version>1.0.4</api-sdk-manager-java-library.version>
-        <private-api-sdk-java.version>2.0.61</private-api-sdk-java.version>
+        <private-api-sdk-java.version>2.0.62</private-api-sdk-java.version>
         <spring-boot-dependencies.version>2.1.15.RELEASE</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>2.1.15.RELEASE</spring-boot-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>

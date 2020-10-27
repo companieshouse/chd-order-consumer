@@ -27,5 +27,6 @@ else
     source "${APP_DIR}/app_env"
 fi
 
-exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "${APP_DIR}/chd-order-consumer.jar"
+#exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "${APP_DIR}/chd-order-consumer.jar"
+exec mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=18577"
 

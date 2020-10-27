@@ -133,11 +133,8 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
         try {
             logMessageReceived(message, order);
 
-            System.out.println("ABOUT TO PROCESS MESSAge");
             // process message
             processor.processItemOrdered(order);
-
-            System.out.println("PROCESSed MESSAge");
 
             // on successful processing remove counterKey from retryCount
             if (retryCount.containsKey(orderReference)) {
@@ -255,7 +252,7 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
             Exception exception) {
         Map<String, Object> logMap = LoggingUtils.getMessageHeadersAsMap(message);
         logMap.put(LoggingUtils.RETRY_ATTEMPT, attempt);
-        LoggingUtils.getLogger().error("'order-received' message processing failed with a recoverable exception",
+        LoggingUtils.getLogger().error("'chd-item-ordered' message processing failed with a recoverable exception",
                 exception, logMap);
     }
 
