@@ -64,7 +64,7 @@ public class ItemOrderedProcessorService {
         }
     }
 
-    public void processError(int statusCode, String errorResponse) {
+    private void processError(int statusCode, String errorResponse) {
         if (statusCode != BAD_REQUEST.value() && statusCode != UNAUTHORIZED.value()) {
             throw new RetryableErrorException(errorResponse);
         } else {
