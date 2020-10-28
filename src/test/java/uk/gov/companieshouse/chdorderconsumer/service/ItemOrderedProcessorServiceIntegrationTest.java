@@ -6,29 +6,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.order.chd.MissingImageDeliveryRequestApi;
 import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
 import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
 import uk.gov.companieshouse.chdorderconsumer.kafka.ItemOrderedKafkaProducer;
-import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 import uk.gov.companieshouse.orders.items.Item;
 
-import java.io.InterruptedIOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 /** Integration tests the {@link ItemOrderedProcessorService} service. */
 @SpringBootTest
@@ -72,7 +66,7 @@ public class ItemOrderedProcessorServiceIntegrationTest {
 
         // Given we have a response that returns 401
         ApiResponse<MissingImageDeliveryRequestApi> apiResponse =
-                new ApiResponse<>(HttpStatus.UNAUTHORIZED.value(), new HttpHeaders(),
+                new ApiResponse<>(UNAUTHORIZED.value(), new HttpHeaders(),
                         new MissingImageDeliveryRequestApi());
         when(chdOrderService.createCHDOrder(any(), any())).thenReturn(apiResponse);
 
@@ -89,7 +83,7 @@ public class ItemOrderedProcessorServiceIntegrationTest {
 
         // Given we have a response that returns 500
         ApiResponse<MissingImageDeliveryRequestApi> apiResponse =
-                new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), new HttpHeaders(),
+                new ApiResponse<>(INTERNAL_SERVER_ERROR.value(), new HttpHeaders(),
                         new MissingImageDeliveryRequestApi());
         when(chdOrderService.createCHDOrder(any(), any())).thenReturn(apiResponse);
 

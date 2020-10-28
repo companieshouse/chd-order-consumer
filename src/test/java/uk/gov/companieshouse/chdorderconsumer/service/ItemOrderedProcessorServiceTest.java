@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.order.chd.MissingImageDeliveryRequestApi;
-import uk.gov.companieshouse.api.model.order.item.MissingImageDeliveryItemOptionsApi;
 import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
 import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
 import uk.gov.companieshouse.orders.items.ChdItemOrdered;
@@ -26,6 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.REQUEST_TIMEOUT;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @ExtendWith(MockitoExtension.class)
 class ItemOrderedProcessorServiceTest {
@@ -77,7 +80,7 @@ class ItemOrderedProcessorServiceTest {
     @Test
     void propogatesRetryableExceptionIfApiErrorResponseExceptionIsInternalServerError() throws ApiErrorResponseException {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
-                .thenThrow(buildApiErrorResponseException(HttpStatus.INTERNAL_SERVER_ERROR));
+                .thenThrow(buildApiErrorResponseException(INTERNAL_SERVER_ERROR));
 
         assertThrows(RetryableErrorException.class, () ->
                 processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED));
@@ -86,7 +89,7 @@ class ItemOrderedProcessorServiceTest {
     @Test
     void propogatesServiceExceptionIfApiErrorResponseExceptionIsBadRequest() throws ApiErrorResponseException {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
-                .thenThrow(buildApiErrorResponseException(HttpStatus.BAD_REQUEST));
+                .thenThrow(buildApiErrorResponseException(BAD_REQUEST));
 
         assertThrows(ServiceException.class, () ->
                 processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED));
@@ -95,7 +98,7 @@ class ItemOrderedProcessorServiceTest {
     @Test
     void propogatesServiceExceptionIfApiErrorResponseExceptionIsUnauthorised() throws ApiErrorResponseException {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
-                .thenThrow(buildApiErrorResponseException(HttpStatus.UNAUTHORIZED));
+                .thenThrow(buildApiErrorResponseException(UNAUTHORIZED));
 
         assertThrows(ServiceException.class, () ->
                 processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED));
@@ -104,7 +107,7 @@ class ItemOrderedProcessorServiceTest {
     @Test
     void propogatesRetryableExceptionIfApiResponseIsRequestTimeOut() throws ApiErrorResponseException {
         ApiResponse<MissingImageDeliveryRequestApi> apiResponse =
-                new ApiResponse<>(HttpStatus.REQUEST_TIMEOUT.value(), new HttpHeaders(),
+                new ApiResponse<>(REQUEST_TIMEOUT.value(), new HttpHeaders(),
                         new MissingImageDeliveryRequestApi());
 
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
@@ -117,7 +120,7 @@ class ItemOrderedProcessorServiceTest {
     @Test
     void propogatesServiceExceptionIfApiResponseIsBadRequest() throws ApiErrorResponseException {
         ApiResponse<MissingImageDeliveryRequestApi> apiResponse =
-                new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), new HttpHeaders(),
+                new ApiResponse<>(BAD_REQUEST.value(), new HttpHeaders(),
                         new MissingImageDeliveryRequestApi());
 
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
@@ -130,7 +133,7 @@ class ItemOrderedProcessorServiceTest {
     @Test
     void propogatesServiceExceptionIfApiResponseIsUnauthorised() throws ApiErrorResponseException {
         ApiResponse<MissingImageDeliveryRequestApi> apiResponse =
-                new ApiResponse<>(HttpStatus.UNAUTHORIZED.value(), new HttpHeaders(),
+                new ApiResponse<>(UNAUTHORIZED.value(), new HttpHeaders(),
                         new MissingImageDeliveryRequestApi());
 
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
