@@ -99,7 +99,7 @@ public class CHDOrderServiceTest {
             .thenReturn(mockChdOrdersPost);
         when(mockChdOrdersPost.execute()).thenThrow(ApiErrorResponseException.class);
 
-        assertThrows(ServiceException.class, () -> chdOrderService.createCHDOrder(
+        assertThrows(ApiErrorResponseException.class, () -> chdOrderService.createCHDOrder(
             POST_MISSING_IMAGE_CHD_ORDER_URI, MISSING_IMAGE_DELIVERY_REQUEST_API));
     }
 }

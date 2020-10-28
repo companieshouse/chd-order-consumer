@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.messaging.MessageHeaders;
 import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
+import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
 import uk.gov.companieshouse.chdorderconsumer.service.ItemOrderedProcessorService;
 import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.message.Message;
@@ -158,6 +159,15 @@ class ItemOrderedKafkaConsumerTest {
         kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC_ERROR));
         // Then
         verify(kafkaConsumer, times(0)).republishMessageToTopic(any(ChdItemOrdered.class), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void republishMessageNotCalledOnNonRetryableErrorException() {
+        // Given & When
+        doThrow(new ServiceException("exception")).when(kafkaConsumer).logMessageReceived(any(), any());
+        kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC));
+        // Then
+        verify(kafkaConsumer, times(0)).republishMessageToTopic(any(), anyString(), anyString(), anyString());
     }
 
     @Test
