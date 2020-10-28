@@ -27,7 +27,7 @@ public class ItemOrderedProcessorService {
         this.chdOrderService = chdOrderService;
     }
 
-    public MissingImageDeliveryRequestApi mapChdItemOrderedToMissingImageDeliveryRequestApi(ChdItemOrdered chdItemOrdered) {
+    MissingImageDeliveryRequestApi mapChdItemOrderedToMissingImageDeliveryRequestApi(ChdItemOrdered chdItemOrdered) {
         MissingImageDeliveryRequestApi missingImageDeliveryRequestApi = new MissingImageDeliveryRequestApi();
         Item item = chdItemOrdered.getItem();
         Map<String, String> itemOptions = item.getItemOptions();

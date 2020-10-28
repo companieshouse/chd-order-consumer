@@ -19,9 +19,9 @@ import uk.gov.companieshouse.orders.items.Item;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -82,8 +82,9 @@ class ItemOrderedProcessorServiceTest {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenThrow(buildApiErrorResponseException(INTERNAL_SERVER_ERROR));
 
-        assertThrows(RetryableErrorException.class, () ->
-                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED));
+        assertThatExceptionOfType(RetryableErrorException.class).isThrownBy(() ->
+                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
+                .withMessageContaining("500");
     }
 
     @Test
@@ -91,8 +92,9 @@ class ItemOrderedProcessorServiceTest {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenThrow(buildApiErrorResponseException(BAD_REQUEST));
 
-        assertThrows(ServiceException.class, () ->
-                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED));
+        assertThatExceptionOfType(ServiceException.class).isThrownBy(() ->
+                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
+                .withMessageContaining("400");
     }
 
     @Test
@@ -100,8 +102,9 @@ class ItemOrderedProcessorServiceTest {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenThrow(buildApiErrorResponseException(UNAUTHORIZED));
 
-        assertThrows(ServiceException.class, () ->
-                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED));
+        assertThatExceptionOfType(ServiceException.class).isThrownBy(() ->
+                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
+                .withMessageContaining("401");
     }
 
     @Test
@@ -113,8 +116,9 @@ class ItemOrderedProcessorServiceTest {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenReturn(apiResponse);
 
-        assertThrows(RetryableErrorException.class, () ->
-                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED));
+        assertThatExceptionOfType(RetryableErrorException.class).isThrownBy(() ->
+                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
+                .withMessageContaining("408");
     }
 
     @Test
@@ -126,8 +130,9 @@ class ItemOrderedProcessorServiceTest {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenReturn(apiResponse);
 
-        assertThrows(ServiceException.class, () ->
-                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED));
+        assertThatExceptionOfType(ServiceException.class).isThrownBy(() ->
+                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
+                .withMessageContaining("400");
     }
 
     @Test
@@ -139,8 +144,9 @@ class ItemOrderedProcessorServiceTest {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenReturn(apiResponse);
 
-        assertThrows(ServiceException.class, () ->
-                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED));
+        assertThatExceptionOfType(ServiceException.class).isThrownBy(() ->
+                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
+                .withMessageContaining("401");
     }
 
     private ApiErrorResponseException buildApiErrorResponseException(HttpStatus httpStatus) {
