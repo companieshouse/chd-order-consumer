@@ -27,7 +27,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 /** Integration tests the {@link ItemOrderedProcessorService} service. */
 @SpringBootTest
 @EmbeddedKafka
-public class ItemOrderedProcessorServiceIntegrationTest {
+class ItemOrderedProcessorServiceIntegrationTest {
 
     private static final ChdItemOrdered CHD_ITEM_ORDERED;
 
