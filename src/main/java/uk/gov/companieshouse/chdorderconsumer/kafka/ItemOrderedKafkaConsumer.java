@@ -9,6 +9,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
 import uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils;
+import uk.gov.companieshouse.chdorderconsumer.service.ItemOrderedProcessorService;
 import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
@@ -51,13 +52,16 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
     private final SerializerFactory serializerFactory;
     private final ItemOrderedKafkaProducer kafkaProducer;
     private final KafkaListenerEndpointRegistry registry;
+    private final ItemOrderedProcessorService processor;
 
     public ItemOrderedKafkaConsumer(SerializerFactory serializerFactory,
-                                    ItemOrderedKafkaProducer kafkaProducer, KafkaListenerEndpointRegistry registry) {
+                                    ItemOrderedKafkaProducer kafkaProducer, KafkaListenerEndpointRegistry registry,
+                                    ItemOrderedProcessorService processor) {
         this.retryCount = new HashMap<>();
         this.serializerFactory = serializerFactory;
         this.kafkaProducer = kafkaProducer;
         this.registry = registry;
+        this.processor = processor;
     }
 
     /**
@@ -128,6 +132,9 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
         final String receivedTopic = headers.get(KafkaHeaders.RECEIVED_TOPIC).toString();
         try {
             logMessageReceived(message, order);
+
+            // process message
+            processor.processItemOrdered(order);
 
             // on successful processing remove counterKey from retryCount
             if (retryCount.containsKey(orderReference)) {
@@ -245,7 +252,7 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
             Exception exception) {
         Map<String, Object> logMap = LoggingUtils.getMessageHeadersAsMap(message);
         logMap.put(LoggingUtils.RETRY_ATTEMPT, attempt);
-        LoggingUtils.getLogger().error("'order-received' message processing failed with a recoverable exception",
+        LoggingUtils.getLogger().error("'chd-item-ordered' message processing failed with a recoverable exception",
                 exception, logMap);
     }
 

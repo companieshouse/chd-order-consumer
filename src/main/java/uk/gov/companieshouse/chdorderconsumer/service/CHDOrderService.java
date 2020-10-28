@@ -18,7 +18,7 @@ public class CHDOrderService {
     }
 
     public ApiResponse<MissingImageDeliveryRequestApi> createCHDOrder(String uri,
-        MissingImageDeliveryRequestApi missingImageDeliveryRequestApi) {
+        MissingImageDeliveryRequestApi missingImageDeliveryRequestApi) throws ApiErrorResponseException {
 
         final InternalApiClient apiClient = apiClientService.getInternalApiClient();
 
@@ -28,9 +28,6 @@ public class CHDOrderService {
                     .execute();
         } catch (URIValidationException ex) {
             throw new ServiceException("Unrecognised uri pattern for: " + uri);
-        } catch (ApiErrorResponseException ex) {
-            throw new ServiceException("API Response Error for : "
-                + missingImageDeliveryRequestApi.getId() + ", Error response: " + ex.getStatusCode());
         }
     }
 }
