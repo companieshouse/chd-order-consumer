@@ -54,17 +54,17 @@ public class ItemOrderedProcessorService {
                     chdOrderService.createCHDOrder(POST_MISSING_IMAGE_CHD_ORDER_URI, missingImageDeliveryRequestApi);
 
             if (missingImageDeliveryRequestApiResponse.getStatusCode() != CREATED.value()) {
-                processException(missingImageDeliveryRequestApiResponse.getStatusCode(), missingImageDeliveryRequestApiResponse.toString());
+                processError(missingImageDeliveryRequestApiResponse.getStatusCode(), missingImageDeliveryRequestApiResponse.toString());
             }
         } catch (ApiErrorResponseException ex) {
             String id = missingImageDeliveryRequestApi.getId() != null ? missingImageDeliveryRequestApi.getId() : "Unknown";
             String errorResponse = "API Response Error for : "
                     + id + ", Error response: " + ex.toString();
-            processException(ex.getStatusCode(), errorResponse);
+            processError(ex.getStatusCode(), errorResponse);
         }
     }
 
-    public void processException(int statusCode, String errorResponse) {
+    public void processError(int statusCode, String errorResponse) {
         if (statusCode != BAD_REQUEST.value() && statusCode != UNAUTHORIZED.value()) {
             throw new RetryableErrorException(errorResponse);
         } else {
