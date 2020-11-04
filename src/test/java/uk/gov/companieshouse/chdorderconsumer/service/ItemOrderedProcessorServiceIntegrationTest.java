@@ -52,6 +52,7 @@ class ItemOrderedProcessorServiceIntegrationTest {
         itemOptions.put("filingHistoryDate", "2009-04-03");
         itemOptions.put("filingHistoryDescription", "description");
         itemOptions.put("filingHistoryType", "Resolution");
+        itemOptions.put("filingHistoryBarcode", "0006594");
         item.setItemOptions(itemOptions);
 
         CHD_ITEM_ORDERED = new ChdItemOrdered();

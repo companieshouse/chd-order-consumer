@@ -47,6 +47,7 @@ public class TestUtils {
         options.put("filingHistoryDescription", "change-person-director-company-with-change-date");
         options.put("filingHistoryId", "MzAwOTM2MDg5OWFkaXF6a2N4");
         options.put("filingHistoryType", "CH01");
+        options.put("filingHistoryBarcode", "086682");
         item.setItemOptions(options);
         final Links links = new Links();
         links.setSelf("/orderable/missing-image-deliveries/MID-535516-028321");
