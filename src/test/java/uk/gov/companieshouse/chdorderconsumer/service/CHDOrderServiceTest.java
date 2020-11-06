@@ -53,6 +53,7 @@ public class CHDOrderServiceTest {
         MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryCategory("Test");
         MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryDate("25-10-2018");
         MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryDescription("Test");
+        MISSING_IMAGE_DELIVERY_REQUEST_API.setFilingHistoryBarcode("086682");
         MISSING_IMAGE_DELIVERY_REQUEST_API.setId("Test");
         MISSING_IMAGE_DELIVERY_REQUEST_API.setItemCost("Test");
         MISSING_IMAGE_DELIVERY_REQUEST_API.setOrderedAt(LocalDateTime.now());

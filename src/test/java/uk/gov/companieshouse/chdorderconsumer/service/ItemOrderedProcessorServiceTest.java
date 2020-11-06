@@ -52,6 +52,7 @@ class ItemOrderedProcessorServiceTest {
         itemOptions.put("filingHistoryDate", "2009-04-03");
         itemOptions.put("filingHistoryDescription", "description");
         itemOptions.put("filingHistoryType", "Resolution");
+        itemOptions.put("filingHistoryBarcode", "0006594");
         item.setItemOptions(itemOptions);
 
         CHD_ITEM_ORDERED = new ChdItemOrdered();
@@ -74,6 +75,7 @@ class ItemOrderedProcessorServiceTest {
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryDate(), is(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryDate")));
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryDescription(), is(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryDescription")));
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryType(), is(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryType")));
+        assertThat(missingImageDeliveryRequestApi.getFilingHistoryBarcode(), is(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryBarcode")));
         assertThat(missingImageDeliveryRequestApi.getItemCost(), is(CHD_ITEM_ORDERED.getItem().getTotalItemCost()));
     }
 
