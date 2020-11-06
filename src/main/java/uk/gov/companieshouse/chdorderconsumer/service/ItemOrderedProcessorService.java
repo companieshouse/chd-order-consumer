@@ -41,6 +41,7 @@ public class ItemOrderedProcessorService {
         missingImageDeliveryRequestApi.setFilingHistoryDate(itemOptions.get("filingHistoryDate"));
         missingImageDeliveryRequestApi.setFilingHistoryDescription(itemOptions.get("filingHistoryDescription"));
         missingImageDeliveryRequestApi.setFilingHistoryType(itemOptions.get("filingHistoryType"));
+        missingImageDeliveryRequestApi.setFilingHistoryBarcode(itemOptions.get("filingHistoryBarcode"));
         missingImageDeliveryRequestApi.setItemCost(item.getTotalItemCost());
         return missingImageDeliveryRequestApi;
     }
