@@ -32,8 +32,6 @@ public class ItemOrderedProcessorService {
         Item item = chdItemOrdered.getItem();
         Map<String, String> itemOptions = item.getItemOptions();
 
-        String filingHistoryId = itemOptions.get("filingHistoryId");
-
         missingImageDeliveryRequestApi.setId(item.getId());
         missingImageDeliveryRequestApi.setCompanyName(item.getCompanyName());
         missingImageDeliveryRequestApi.setCompanyNumber(item.getCompanyNumber());
