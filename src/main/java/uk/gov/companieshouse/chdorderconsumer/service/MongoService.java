@@ -37,7 +37,9 @@ public class MongoService {
 
         MongoClient mongoClient = new MongoClient(mongoConnectionName, mongoPortNumber);
         MongoDatabase database = mongoClient.getDatabase(mongoDatabaseName);
-        FindIterable<Document> documents = database.getCollection(mongoCollection).find(Filters.eq(transactionId))
+
+        FindIterable<Document> documents = database.getCollection(mongoCollection)
+            .find(Filters.eq(transactionId))
             .projection(Projections.include(entityIdField));
 
         Document document = documents.first();
