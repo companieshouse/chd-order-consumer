@@ -40,6 +40,9 @@ class ItemOrderedProcessorServiceIntegrationTest {
     @MockBean
     private ItemOrderedKafkaProducer producer;
 
+    @MockBean
+    private MongoService mockMongoService;
+
     static {
         Item item = new Item();
         item.setId("1");

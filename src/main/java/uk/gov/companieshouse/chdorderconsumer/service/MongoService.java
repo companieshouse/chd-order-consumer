@@ -42,10 +42,10 @@ public class MongoService {
 
         Document document = documents.first();
 
-        String enitityIdValue = (String)document.get(entityIdField);
+        String entityIdValue = (String)document.get(entityIdField);
 
         mongoClient.close();
 
-        return enitityIdValue;
+        return entityIdValue;
     }
 }
