@@ -23,8 +23,12 @@ public class ItemOrderedProcessorService {
 
     private final CHDOrderService chdOrderService;
 
-    public ItemOrderedProcessorService(final CHDOrderService chdOrderService) {
+    private final MongoService mongoService;
+
+    public ItemOrderedProcessorService(final CHDOrderService chdOrderService,
+                                       final MongoService mongoService) {
         this.chdOrderService = chdOrderService;
+        this.mongoService = mongoService;
     }
 
     MissingImageDeliveryRequestApi mapChdItemOrderedToMissingImageDeliveryRequestApi(ChdItemOrdered chdItemOrdered) {
@@ -43,6 +47,10 @@ public class ItemOrderedProcessorService {
         missingImageDeliveryRequestApi.setFilingHistoryType(itemOptions.get("filingHistoryType"));
         missingImageDeliveryRequestApi.setFilingHistoryBarcode(itemOptions.get("filingHistoryBarcode"));
         missingImageDeliveryRequestApi.setItemCost(item.getTotalItemCost());
+
+        String entityID = mongoService.getEntityId(itemOptions.get("filingHistoryId"));
+        missingImageDeliveryRequestApi.setEntityId(entityID);
+
         return missingImageDeliveryRequestApi;
     }
 

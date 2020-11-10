@@ -37,8 +37,13 @@ class ItemOrderedProcessorServiceTest {
     @Mock
     private CHDOrderService chdOrderService;
 
+    @Mock
+    private MongoService mockMongoService;
+
     @InjectMocks
     private ItemOrderedProcessorService processorUnderTest;
+
+    private static final String ENTITY_ID = "01234567";
 
     static {
         Item item = new Item();
@@ -49,6 +54,7 @@ class ItemOrderedProcessorServiceTest {
 
         Map<String, String> itemOptions = new HashMap<>();
         itemOptions.put("filingHistoryCategory", "RESOLUTIONS");
+        itemOptions.put("filingHistoryId", "fsdf2342sdf234242");
         itemOptions.put("filingHistoryDate", "2009-04-03");
         itemOptions.put("filingHistoryDescription", "description");
         itemOptions.put("filingHistoryType", "Resolution");
@@ -63,6 +69,8 @@ class ItemOrderedProcessorServiceTest {
 
     @Test
     void mapChdItemOrderedToMissingImageDeliveryRequestApiCorrectly() {
+        when(mockMongoService.getEntityId(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryId"))).thenReturn(ENTITY_ID);
+
         MissingImageDeliveryRequestApi missingImageDeliveryRequestApi
                 = processorUnderTest.mapChdItemOrderedToMissingImageDeliveryRequestApi(CHD_ITEM_ORDERED);
 
@@ -76,6 +84,7 @@ class ItemOrderedProcessorServiceTest {
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryDescription(), is(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryDescription")));
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryType(), is(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryType")));
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryBarcode(), is(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryBarcode")));
+        assertThat(missingImageDeliveryRequestApi.getEntityId(), is (ENTITY_ID));
         assertThat(missingImageDeliveryRequestApi.getItemCost(), is(CHD_ITEM_ORDERED.getItem().getTotalItemCost()));
     }
 
