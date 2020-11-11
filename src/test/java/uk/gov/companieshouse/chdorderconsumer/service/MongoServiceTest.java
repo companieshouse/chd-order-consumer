@@ -14,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.chdorderconsumer.client.MongoClientCreator;
 import uk.gov.companieshouse.environment.EnvironmentReader;
 
 import static org.junit.Assert.assertEquals;
@@ -43,9 +42,6 @@ public class MongoServiceTest {
 
     @Mock
     private FindIterable<Document> findIterableMocked;
-
-    @Mock
-    private MongoClientCreator mockMongoClientCreator;
 
     @Rule
     public EnvironmentVariables environmentVariables = new EnvironmentVariables();

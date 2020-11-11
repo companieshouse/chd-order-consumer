@@ -3,6 +3,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.mongodb.MongoClient;
+
 @Configuration
 public class MongoConfig {
 
@@ -14,7 +15,6 @@ public class MongoConfig {
 
     @Bean
     public MongoClient mongoClient() {
-        MongoClient mongoClient = new MongoClient(connectionString, connectionPort);
-        return mongoClient;
+        return new MongoClient(connectionString, connectionPort);
     }
 }
