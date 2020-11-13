@@ -1,20 +1,23 @@
 package uk.gov.companieshouse.chdorderconsumer.service;
 
-import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.error.ApiErrorResponseException;
-import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.order.chd.MissingImageDeliveryRequestApi;
-import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
-import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
-import uk.gov.companieshouse.orders.items.ChdItemOrdered;
-import uk.gov.companieshouse.orders.items.Item;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import org.springframework.stereotype.Service;
+
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.api.model.order.chd.MissingImageDeliveryRequestApi;
+import uk.gov.companieshouse.chdorderconsumer.exception.DuplicateErrorException;
+import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
+import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
+import uk.gov.companieshouse.orders.items.Item;
 
 @Service
 public class ItemOrderedProcessorService {
@@ -61,7 +64,6 @@ public class ItemOrderedProcessorService {
 
             ApiResponse<MissingImageDeliveryRequestApi> missingImageDeliveryRequestApiResponse =
                     chdOrderService.createCHDOrder(POST_MISSING_IMAGE_CHD_ORDER_URI, missingImageDeliveryRequestApi);
-
             if (missingImageDeliveryRequestApiResponse.getStatusCode() != CREATED.value()) {
                 processError(missingImageDeliveryRequestApiResponse.getStatusCode(), missingImageDeliveryRequestApiResponse.toString());
             }
@@ -74,8 +76,10 @@ public class ItemOrderedProcessorService {
     }
 
     private void processError(int statusCode, String errorResponse) {
-        if (statusCode != BAD_REQUEST.value() && statusCode != UNAUTHORIZED.value()) {
+        if (statusCode != BAD_REQUEST.value() && statusCode != UNAUTHORIZED.value() && statusCode != CONFLICT.value()) {
             throw new RetryableErrorException(errorResponse);
+        } else if( statusCode == CONFLICT.value() ){
+            throw new DuplicateErrorException(errorResponse);
         } else {
             throw new ServiceException(errorResponse);
         }
