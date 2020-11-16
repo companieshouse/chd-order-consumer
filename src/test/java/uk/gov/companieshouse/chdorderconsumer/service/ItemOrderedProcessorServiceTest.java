@@ -1,24 +1,5 @@
 package uk.gov.companieshouse.chdorderconsumer.service;
 
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpResponseException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import uk.gov.companieshouse.api.error.ApiErrorResponseException;
-import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.order.chd.MissingImageDeliveryRequestApi;
-import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
-import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
-import uk.gov.companieshouse.orders.items.ChdItemOrdered;
-import uk.gov.companieshouse.orders.items.Item;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -29,6 +10,29 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.REQUEST_TIMEOUT;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.CONFLICT;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
+
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.api.model.order.chd.MissingImageDeliveryRequestApi;
+import uk.gov.companieshouse.chdorderconsumer.exception.DuplicateErrorException;
+import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
+import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
+import uk.gov.companieshouse.orders.items.ChdItemOrdered;
+import uk.gov.companieshouse.orders.items.Item;
 
 @ExtendWith(MockitoExtension.class)
 class ItemOrderedProcessorServiceTest {
@@ -116,6 +120,16 @@ class ItemOrderedProcessorServiceTest {
         assertThatExceptionOfType(ServiceException.class).isThrownBy(() ->
                 processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
                 .withMessageContaining("401");
+    }
+
+    @Test
+    void propogatesServiceExceptionIfApiErrorResponseExceptionIsConflicted() throws ApiErrorResponseException {
+        when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
+                .thenThrow(buildApiErrorResponseException(CONFLICT));
+
+        assertThatExceptionOfType(DuplicateErrorException.class).isThrownBy(() ->
+                processorUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
+                .withMessageContaining("409");
     }
 
     @Test

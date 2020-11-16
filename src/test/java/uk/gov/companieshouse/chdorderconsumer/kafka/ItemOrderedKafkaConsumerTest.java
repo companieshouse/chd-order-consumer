@@ -12,6 +12,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.messaging.MessageHeaders;
+
+import uk.gov.companieshouse.chdorderconsumer.exception.DuplicateErrorException;
 import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
 import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
 import uk.gov.companieshouse.chdorderconsumer.service.ItemOrderedProcessorService;
@@ -167,6 +169,16 @@ class ItemOrderedKafkaConsumerTest {
         doThrow(new ServiceException("exception")).when(kafkaConsumer).logMessageReceived(any(), any());
         kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC));
         // Then
+        verify(kafkaConsumer, times(0)).republishMessageToTopic(any(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void logMessageProcessingFailureDuplicateItemRetryableErrorException() {
+        // Given & When
+        String errMsg = CHD_ITEM_ORDERED_TOPIC + " message processing failed item already exists";
+        doThrow(new DuplicateErrorException(errMsg)).doNothing().when(kafkaConsumer).logMessageReceived(any(), any());
+        kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC));
+        // Then kafka is not called
         verify(kafkaConsumer, times(0)).republishMessageToTopic(any(), anyString(), anyString(), anyString());
     }
 
