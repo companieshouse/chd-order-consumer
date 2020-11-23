@@ -3,6 +3,7 @@ package uk.gov.companieshouse.chdorderconsumer.service;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -37,6 +38,7 @@ import uk.gov.companieshouse.orders.items.Item;
 @ExtendWith(MockitoExtension.class)
 class ItemOrderedProcessorServiceTest {
     private static final ChdItemOrdered CHD_ITEM_ORDERED;
+    private static final ChdItemOrdered CHD_ITEM_ORDERED_NO_BARCODE;
 
     @Mock
     private CHDOrderService chdOrderService;
@@ -48,6 +50,7 @@ class ItemOrderedProcessorServiceTest {
     private ItemOrderedProcessorService processorUnderTest;
 
     private static final String ENTITY_ID = "01234567";
+    private static final String BARCODE = "001122334";
 
     static {
         Item item = new Item();
@@ -71,6 +74,27 @@ class ItemOrderedProcessorServiceTest {
         CHD_ITEM_ORDERED.setItem(item);
     }
 
+    static {
+        Item item = new Item();
+        item.setId("1");
+        item.setCompanyName("Company Name");
+        item.setCompanyNumber("00000000");
+        item.setTotalItemCost("5");
+
+        Map<String, String> itemOptions = new HashMap<>();
+        itemOptions.put("filingHistoryCategory", "RESOLUTIONS");
+        itemOptions.put("filingHistoryId", "fsdf2342sdf234242");
+        itemOptions.put("filingHistoryDate", "2009-04-03");
+        itemOptions.put("filingHistoryDescription", "description");
+        itemOptions.put("filingHistoryType", "Resolution");
+        item.setItemOptions(itemOptions);
+
+        CHD_ITEM_ORDERED_NO_BARCODE = new ChdItemOrdered();
+        CHD_ITEM_ORDERED_NO_BARCODE.setOrderedAt("2020-10-27T09:39:10.873");
+        CHD_ITEM_ORDERED_NO_BARCODE.setPaymentReference("payment ref");
+        CHD_ITEM_ORDERED_NO_BARCODE.setItem(item);
+    }
+
     @Test
     void mapChdItemOrderedToMissingImageDeliveryRequestApiCorrectly() {
         when(mockMongoService.getEntityId(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryId"))).thenReturn(ENTITY_ID);
@@ -90,6 +114,28 @@ class ItemOrderedProcessorServiceTest {
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryBarcode(), is(CHD_ITEM_ORDERED.getItem().getItemOptions().get("filingHistoryBarcode")));
         assertThat(missingImageDeliveryRequestApi.getEntityId(), is (ENTITY_ID));
         assertThat(missingImageDeliveryRequestApi.getItemCost(), is(CHD_ITEM_ORDERED.getItem().getTotalItemCost()));
+    }
+
+    @Test
+    void mapChdItemOrderedNoBarcodeToMissingImageDeliveryRequestApiCorrectly() {
+        when(mockMongoService.getEntityId(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getItemOptions().get("filingHistoryId"))).thenReturn(null);
+        when(mockMongoService.getBarcode(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getItemOptions().get("filingHistoryId"))).thenReturn(BARCODE);
+
+        MissingImageDeliveryRequestApi missingImageDeliveryRequestApi
+            = processorUnderTest.mapChdItemOrderedToMissingImageDeliveryRequestApi(CHD_ITEM_ORDERED_NO_BARCODE);
+
+        assertThat(missingImageDeliveryRequestApi.getId(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getId()));
+        assertThat(missingImageDeliveryRequestApi.getCompanyName(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getCompanyName()));
+        assertThat(missingImageDeliveryRequestApi.getCompanyNumber(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getCompanyNumber()));
+        assertThat(missingImageDeliveryRequestApi.getOrderedAt().toString(), is(CHD_ITEM_ORDERED_NO_BARCODE.getOrderedAt()));
+        assertThat(missingImageDeliveryRequestApi.getPaymentReference(), is(CHD_ITEM_ORDERED_NO_BARCODE.getPaymentReference()));
+        assertThat(missingImageDeliveryRequestApi.getFilingHistoryCategory(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getItemOptions().get("filingHistoryCategory")));
+        assertThat(missingImageDeliveryRequestApi.getFilingHistoryDate(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getItemOptions().get("filingHistoryDate")));
+        assertThat(missingImageDeliveryRequestApi.getFilingHistoryDescription(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getItemOptions().get("filingHistoryDescription")));
+        assertThat(missingImageDeliveryRequestApi.getFilingHistoryType(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getItemOptions().get("filingHistoryType")));
+        assertThat(missingImageDeliveryRequestApi.getFilingHistoryBarcode(), is(BARCODE));
+        assertNull(missingImageDeliveryRequestApi.getEntityId());
+        assertThat(missingImageDeliveryRequestApi.getItemCost(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getTotalItemCost()));
     }
 
     @Test

@@ -53,6 +53,8 @@ public class MongoServiceTest {
     private static final String ENTITY_ID = "_entity_id";
     private static final String ENTITY_ID_FIELD = "ENTITY_ID_FIELD";
     private static final String ENTITY_ID_VALUE = "112233445";
+    private static final String BARCODE = "barcode";
+    private static final String BARCODE_VALUE = "001122334";
 
     @Test
     @DisplayName("Entity id returned successfully from mongo collection")
@@ -75,5 +77,26 @@ public class MongoServiceTest {
         when(findIterableMocked.first()).thenReturn(document);
         String entityId = mongoService.getEntityId(TRANSACTION_ID);
         assertEquals(ENTITY_ID_VALUE, entityId);
+    }
+
+    @Test
+    @DisplayName("Barcode returned successfully from mongo collection")
+    void BarcodeReturnedSuccessfully() {
+        Document document = new Document();
+        document.append(ID, TRANSACTION_ID);
+        document.append(BARCODE, BARCODE_VALUE);
+
+        doReturn(COMPANY_FILING_HISTORY).when(environmentReader)
+            .getMandatoryString(MONGO_DATABASE_NAME);
+        doReturn(COMPANY_FILING_HISTORY).when(environmentReader)
+            .getMandatoryString(MONGO_COLLECTION);
+
+        when(mockMongoClient.getDatabase(anyString())).thenReturn(mockMongoDatabase);
+        when(mockMongoDatabase.getCollection(anyString())).thenReturn(mockMongoCollection);
+        when(mockMongoCollection.find(any(Bson.class))).thenReturn(findIterableMocked);
+        when(findIterableMocked.projection(any(Bson.class))).thenReturn(findIterableMocked);
+        when(findIterableMocked.first()).thenReturn(document);
+        String barcode = mongoService.getBarcode(TRANSACTION_ID);
+        assertEquals(BARCODE_VALUE, barcode);
     }
 }
