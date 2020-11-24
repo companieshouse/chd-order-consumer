@@ -16,6 +16,7 @@ public class MongoService {
     private static final String MONGO_DATABASE_NAME = "MONGO_DATABASE_NAME";
     private static final String MONGO_COLLECTION = "MONGO_COLLECTION";
     private static final String ENTITY_ID_FIELD = "ENTITY_ID_FIELD";
+    private static final String BARCODE_FIELD = "barcode";
 
     @Autowired
     private MongoClient mongoClient;
@@ -24,14 +25,13 @@ public class MongoService {
     private EnvironmentReader environmentReader;
 
     public String getEntityId(String transactionId) {
-        String mongoDatabaseName = environmentReader
-            .getMandatoryString(MONGO_DATABASE_NAME);
         String mongoCollection = environmentReader
             .getMandatoryString(MONGO_COLLECTION);
         String entityIdField = environmentReader
             .getMandatoryString(ENTITY_ID_FIELD);
 
-        MongoDatabase database = mongoClient.getDatabase(mongoDatabaseName);
+        MongoDatabase database = getDatabase();
+
         FindIterable<Document> documents = database.getCollection(mongoCollection)
             .find(Filters.eq(transactionId))
             .projection(Projections.include(entityIdField));
@@ -39,5 +39,27 @@ public class MongoService {
         String entityIdValue = (String) document.get(entityIdField);
 
         return entityIdValue;
+    }
+
+    public String getBarcode(String transactionId) {
+        String mongoCollection = environmentReader
+            .getMandatoryString(MONGO_COLLECTION);
+
+        MongoDatabase database = getDatabase();
+
+        FindIterable<Document> documents = database.getCollection(mongoCollection)
+            .find(Filters.eq(transactionId))
+            .projection(Projections.include(BARCODE_FIELD));
+        Document document = documents.first();
+        String barcode = (String) document.get(BARCODE_FIELD);
+
+        return barcode;
+    }
+
+    private MongoDatabase getDatabase() {
+        String mongoDatabaseName = environmentReader
+            .getMandatoryString(MONGO_DATABASE_NAME);
+
+        return mongoClient.getDatabase(mongoDatabaseName);
     }
 }

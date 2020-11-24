@@ -51,8 +51,15 @@ public class ItemOrderedProcessorService {
         missingImageDeliveryRequestApi.setFilingHistoryBarcode(itemOptions.get("filingHistoryBarcode"));
         missingImageDeliveryRequestApi.setItemCost(item.getTotalItemCost());
 
-        String entityID = mongoService.getEntityId(itemOptions.get("filingHistoryId"));
-        missingImageDeliveryRequestApi.setEntityId(entityID);
+        String filingHistoryId = itemOptions.get("filingHistoryId");
+
+        missingImageDeliveryRequestApi.setEntityId(mongoService.getEntityId(filingHistoryId));
+
+        if (missingImageDeliveryRequestApi.getEntityId() == null &&
+            missingImageDeliveryRequestApi.getFilingHistoryBarcode() == null) {
+
+            missingImageDeliveryRequestApi.setFilingHistoryBarcode(mongoService.getBarcode(filingHistoryId));
+        }
 
         return missingImageDeliveryRequestApi;
     }
