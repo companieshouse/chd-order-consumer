@@ -18,6 +18,7 @@ import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
 import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
 import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 import uk.gov.companieshouse.orders.items.Item;
+import uk.gov.companieshouse.orders.items.OrderedBy;
 
 @Service
 public class ItemOrderedProcessorService {
@@ -37,6 +38,7 @@ public class ItemOrderedProcessorService {
     MissingImageDeliveryRequestApi mapChdItemOrderedToMissingImageDeliveryRequestApi(ChdItemOrdered chdItemOrdered) {
         MissingImageDeliveryRequestApi missingImageDeliveryRequestApi = new MissingImageDeliveryRequestApi();
         Item item = chdItemOrdered.getItem();
+        OrderedBy orderedBy = chdItemOrdered.getOrderedBy();
         Map<String, String> itemOptions = item.getItemOptions();
 
         missingImageDeliveryRequestApi.setId(item.getId());
@@ -50,6 +52,7 @@ public class ItemOrderedProcessorService {
         missingImageDeliveryRequestApi.setFilingHistoryType(itemOptions.get("filingHistoryType"));
         missingImageDeliveryRequestApi.setFilingHistoryBarcode(itemOptions.get("filingHistoryBarcode"));
         missingImageDeliveryRequestApi.setItemCost(item.getTotalItemCost());
+        missingImageDeliveryRequestApi.setEmailAddress(orderedBy.getEmail());
 
         String filingHistoryId = itemOptions.get("filingHistoryId");
 
