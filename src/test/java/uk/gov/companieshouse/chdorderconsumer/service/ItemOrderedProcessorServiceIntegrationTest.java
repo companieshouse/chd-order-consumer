@@ -14,6 +14,7 @@ import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
 import uk.gov.companieshouse.chdorderconsumer.kafka.ItemOrderedKafkaProducer;
 import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 import uk.gov.companieshouse.orders.items.Item;
+import uk.gov.companieshouse.orders.items.OrderedBy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,9 @@ class ItemOrderedProcessorServiceIntegrationTest {
         item.setCompanyNumber("00000000");
         item.setTotalItemCost("5");
 
+        OrderedBy orderedBy = new OrderedBy();
+        orderedBy.setEmail("test@email.com");
+
         Map<String, String> itemOptions = new HashMap<>();
         itemOptions.put("filingHistoryCategory", "RESOLUTIONS");
         itemOptions.put("filingHistoryDate", "2009-04-03");
@@ -62,6 +66,7 @@ class ItemOrderedProcessorServiceIntegrationTest {
         CHD_ITEM_ORDERED.setOrderedAt("2020-10-27T09:39:10.873");
         CHD_ITEM_ORDERED.setPaymentReference("payment ref");
         CHD_ITEM_ORDERED.setItem(item);
+        CHD_ITEM_ORDERED.setOrderedBy(orderedBy);
     }
 
     @Test
