@@ -33,6 +33,9 @@
         <spring-boot-maven-plugin.version>2.1.15.RELEASE</spring-boot-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+
+        <!-- Docker -->
+        <jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -206,7 +209,7 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>2.7.0</version>
+                <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <container>
                         <expandClasspathDependencies>true</expandClasspathDependencies>
