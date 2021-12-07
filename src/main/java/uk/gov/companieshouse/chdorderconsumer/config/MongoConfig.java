@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.chdorderconsumer.config;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
 
 @Configuration
 public class MongoConfig {
@@ -13,7 +13,6 @@ public class MongoConfig {
 
     @Bean
     public MongoClient mongoClient() {
-        MongoClientURI mongoClientUri = new MongoClientURI(connectionString);
-        return new MongoClient(mongoClientUri);
+        return MongoClients.create(connectionString);
     }
 }
