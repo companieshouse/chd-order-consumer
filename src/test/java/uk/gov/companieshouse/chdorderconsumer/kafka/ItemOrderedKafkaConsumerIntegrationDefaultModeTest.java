@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.text.IsEmptyString.emptyOrNullString;
-import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.assertJsonsEqualIgnoringFieldOrdering;
 import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -106,36 +105,6 @@ class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
         verifyProcessChdItemOrderedNotInvoked(CHConsumerType.ERROR_CONSUMER);
     }
 
-    @Test
-    @DirtiesContext
-    @DisplayName("chd-item-ordered topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is false")
-    void testItemOrderedConsumerReceivesChdItemOrderedMessage2() throws Exception {
-
-        // Given
-        final ChdItemOrdered order = createOrder();
-
-        // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(order, CHD_ITEM_ORDERED_TOPIC));
-
-        // Then
-        verifyProcessChdItemOrderedInvoked(order, CHConsumerType.MAIN_CONSUMER);
-    }
-
-    @Test
-    @DirtiesContext
-    @DisplayName("chd-item-ordered topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is false")
-    void testItemOrderedConsumerReceivesChdItemOrderedMessage3Retry() throws Exception {
-
-        // Given
-        final ChdItemOrdered order = createOrder();
-
-        // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(order, CHD_ITEM_ORDERED_TOPIC_RETRY));
-
-        // Then
-        verifyProcessChdItemOrderedInvoked(order, CHConsumerType.RETRY_CONSUMER);
-    }
-
     private void verifyProcessChdItemOrderedNotInvoked(CHConsumerType type) throws InterruptedException {
         consumerWrapper.setTestType(type);
         consumerWrapper.getLatch().await(6000, TimeUnit.MILLISECONDS);
@@ -143,14 +112,4 @@ class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
         String processedOrderReference = consumerWrapper.getMessagePayload();
         assertThat(processedOrderReference, emptyOrNullString());
     }
-
-    private void verifyProcessChdItemOrderedInvoked(final ChdItemOrdered order,
-                                                    final CHConsumerType type) throws Exception {
-        consumerWrapper.setTestType(type);
-        consumerWrapper.getLatch().await(6000, TimeUnit.MILLISECONDS);
-        assertThat(consumerWrapper.getLatch().getCount(), is(equalTo(0L)));
-        final String messagePayload = consumerWrapper.getMessagePayload();
-        assertJsonsEqualIgnoringFieldOrdering(messagePayload, order.toString());
-    }
-
 }
