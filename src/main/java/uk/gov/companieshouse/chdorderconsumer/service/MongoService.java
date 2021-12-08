@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.chdorderconsumer.service;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
@@ -36,9 +36,7 @@ public class MongoService {
             .find(Filters.eq(transactionId))
             .projection(Projections.include(entityIdField));
         Document document = documents.first();
-        String entityIdValue = (String) document.get(entityIdField);
-
-        return entityIdValue;
+        return (String) document.get(entityIdField);
     }
 
     public String getBarcode(String transactionId) {
@@ -51,9 +49,7 @@ public class MongoService {
             .find(Filters.eq(transactionId))
             .projection(Projections.include(BARCODE_FIELD));
         Document document = documents.first();
-        String barcode = (String) document.get(BARCODE_FIELD);
-
-        return barcode;
+        return (String) document.get(BARCODE_FIELD);
     }
 
     private MongoDatabase getDatabase() {

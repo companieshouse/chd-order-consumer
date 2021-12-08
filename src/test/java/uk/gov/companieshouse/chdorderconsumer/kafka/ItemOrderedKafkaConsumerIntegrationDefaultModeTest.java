@@ -1,14 +1,18 @@
 package uk.gov.companieshouse.chdorderconsumer.kafka;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.text.IsEmptyString.emptyOrNullString;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,17 +34,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.assertJsonsEqualIgnoringFieldOrdering;
-import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
-
 @SpringBootTest
 @EmbeddedKafka
 @TestPropertySource(properties={"uk.gov.companieshouse.chdorderconsumer.error-consumer=false"})
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
 
     private static final String CHD_ITEM_ORDERED_TOPIC = "chd-item-ordered";
@@ -111,49 +107,9 @@ class ItemOrderedKafkaConsumerIntegrationDefaultModeTest {
 
     private void verifyProcessChdItemOrderedNotInvoked(CHConsumerType type) throws InterruptedException {
         consumerWrapper.setTestType(type);
-        consumerWrapper.getLatch().await(3000, TimeUnit.MILLISECONDS);
+        consumerWrapper.getLatch().await(6000, TimeUnit.MILLISECONDS);
         assertThat(consumerWrapper.getLatch().getCount(), is(equalTo(1L)));
         String processedOrderReference = consumerWrapper.getMessagePayload();
-        assertThat(processedOrderReference, isEmptyOrNullString());
+        assertThat(processedOrderReference, emptyOrNullString());
     }
-
-    @Test
-    @DirtiesContext
-    @DisplayName("chd-item-ordered topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is false")
-    void testItemOrderedConsumerReceivesChdItemOrderedMessage2() throws Exception {
-
-        // Given
-        final ChdItemOrdered order = createOrder();
-
-        // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(order, CHD_ITEM_ORDERED_TOPIC));
-
-        // Then
-        verifyProcessChdItemOrderedInvoked(order, CHConsumerType.MAIN_CONSUMER);
-    }
-
-    @Test
-    @DirtiesContext
-    @DisplayName("chd-item-ordered topic consumer receives message when 'error-consumer' (env var IS_ERROR_QUEUE_CONSUMER) is false")
-    void testItemOrderedConsumerReceivesChdItemOrderedMessage3Retry() throws Exception {
-
-        // Given
-        final ChdItemOrdered order = createOrder();
-
-        // When
-        kafkaProducer.sendMessage(consumerWrapper.createMessage(order, CHD_ITEM_ORDERED_TOPIC_RETRY));
-
-        // Then
-        verifyProcessChdItemOrderedInvoked(order, CHConsumerType.RETRY_CONSUMER);
-    }
-
-    private void verifyProcessChdItemOrderedInvoked(final ChdItemOrdered order,
-                                                    final CHConsumerType type) throws Exception {
-        consumerWrapper.setTestType(type);
-        consumerWrapper.getLatch().await(3000, TimeUnit.MILLISECONDS);
-        assertThat(consumerWrapper.getLatch().getCount(), is(equalTo(0L)));
-        final String messagePayload = consumerWrapper.getMessagePayload();
-        assertJsonsEqualIgnoringFieldOrdering(messagePayload, order.toString());
-    }
-
 }
