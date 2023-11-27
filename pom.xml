@@ -15,22 +15,24 @@
 
     <properties>
         <commons.lang.version>2.6</commons.lang.version>
-        <java.version>1.8</java.version>
+        <java.version>21</java.version>
         <org.mapstruct.version>1.3.0.Final</org.mapstruct.version>
         <hamcrest-all-version>1.3</hamcrest-all-version>
         <start-class>uk.gov.companieshouse.chdorderconsumer.ChdOrderConsumerApplication</start-class>
-        <structured-logging.version>1.9.12</structured-logging.version>
-        <kafka-models.version>1.0.17</kafka-models.version>
-        <environment-reader-library.version>1.3.6</environment-reader-library.version>
+        <structured-logging.version>3.0.1</structured-logging.version>
+        <kafka-models.version>3.0.1</kafka-models.version>
+        <environment-reader-library.version>3.0.0</environment-reader-library.version>
         <system-rules-version>1.17.2</system-rules-version>
-        <ch-kafka.version>1.4.2</ch-kafka.version>
-        <api-sdk-manager-java-library.version>1.0.4</api-sdk-manager-java-library.version>
-        <private-api-sdk-java.version>2.0.65</private-api-sdk-java.version>
+        <ch-kafka.version>3.0.0</ch-kafka.version>
+        <api-sdk-manager-java-library.version>3.0.1</api-sdk-manager-java-library.version>
+        <private-api-sdk-java.version>4.0.1</private-api-sdk-java.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
-        <spring-boot-dependencies.version>2.5.5</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.1.5</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>2.5.5</spring-boot-maven-plugin.version>
+
+        <snakeyaml.version>2.2</snakeyaml.version>
 
         <!-- Docker -->
         <jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
@@ -129,6 +131,11 @@
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>api-sdk-manager-java-library</artifactId>
             <version>${api-sdk-manager-java-library.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
         </dependency>
     </dependencies>
 
