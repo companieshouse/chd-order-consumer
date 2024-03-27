@@ -44,10 +44,10 @@ public class LoggingUtils {
         Map<String, Object> logMap = LoggingUtils.createLogMap();
         MessageHeaders messageHeaders = message.getHeaders();
 
-        logIfNotNull(logMap, KEY, messageHeaders.get(KafkaHeaders.RECEIVED_MESSAGE_KEY));
+        logIfNotNull(logMap, KEY, messageHeaders.get(KafkaHeaders.RECEIVED_KEY));
         logIfNotNull(logMap, TOPIC, messageHeaders.get(KafkaHeaders.RECEIVED_TOPIC));
         logIfNotNull(logMap, OFFSET, messageHeaders.get(KafkaHeaders.OFFSET));
-        logIfNotNull(logMap, PARTITION, messageHeaders.get(KafkaHeaders.RECEIVED_PARTITION_ID));
+        logIfNotNull(logMap, PARTITION, messageHeaders.get(KafkaHeaders.RECEIVED_PARTITION));
 
         return logMap;
     }
