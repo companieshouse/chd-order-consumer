@@ -56,6 +56,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-rest</artifactId>
         </dependency>
         <dependency>
@@ -200,6 +204,13 @@
                     <container>
                         <expandClasspathDependencies>true</expandClasspathDependencies>
                     </container>
+                    <from>
+                        <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-build-21:latest</image>
+                    </from>
+                    <to>
+                        //Once the pipeline is moved to shared services need to update this to image reference from shared services
+                        <image>169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/chd-order-consumer:latest</image>
+                    </to>
                 </configuration>
             </plugin>
 
