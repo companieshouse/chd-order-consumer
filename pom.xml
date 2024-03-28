@@ -101,6 +101,7 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
+            <version>3.0.13</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.pcollections</groupId>

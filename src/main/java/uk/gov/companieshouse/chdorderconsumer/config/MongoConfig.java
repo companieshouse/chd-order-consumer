@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MongoConfig {
 
-    @Value("${spring.data.mongodb.host}")
+    @Value("${spring.data.mongodb.uri}")
     private String connectionString;
 
     @Bean
