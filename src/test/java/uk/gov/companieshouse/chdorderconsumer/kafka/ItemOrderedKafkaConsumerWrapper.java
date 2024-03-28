@@ -30,15 +30,14 @@ import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 public class ItemOrderedKafkaConsumerWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
-    private CountDownLatch latch = new CountDownLatch(1);
+    private final CountDownLatch latch = new CountDownLatch(1);
     private String messagePayload;
-    private CHConsumerType testType = CHConsumerType.MAIN_CONSUMER;
+    private final CHConsumerType testType = CHConsumerType.MAIN_CONSUMER;
     @Value("${spring.kafka.bootstrap-servers}")
     private String brokerAddresses;
     private static final String CHD_ITEM_ORDERED_TOPIC = "chd-item-ordered";
     private static final String CHD_ITEM_ORDERED_TOPIC_RETRY = "chd-item-ordered-retry";
     private static final String CHD_ITEM_ORDERED_TOPIC_ERROR = "chd-item-ordered-error";
-    private static final String ORDER_REFERENCE = "ORD-123456-123456";
     private static final String CHD_ITEM_ORDERED_KEY_RETRY = CHD_ITEM_ORDERED_TOPIC_RETRY;
     @Autowired
     private ItemOrderedKafkaProducer kafkaProducer;
@@ -84,10 +83,6 @@ public class ItemOrderedKafkaConsumerWrapper {
         this.messagePayload = "" + message.getPayload();
         latch.countDown();
     }
-
-    CountDownLatch getLatch() { return latch; }
-    String getMessagePayload() { return messagePayload; }
-    void setTestType(CHConsumerType type) { this.testType = type;}
 
     private void setUpTestKafkaItemOrderedProducerAndSendMessageToTopic()
             throws ExecutionException, InterruptedException, SerializationException {

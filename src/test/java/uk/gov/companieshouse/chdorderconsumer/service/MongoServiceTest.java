@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.chdorderconsumer.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -14,6 +13,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,7 +76,7 @@ public class MongoServiceTest {
         when(findIterableMocked.projection(any(Bson.class))).thenReturn(findIterableMocked);
         when(findIterableMocked.first()).thenReturn(document);
         String entityId = mongoService.getEntityId(TRANSACTION_ID);
-        assertEquals(ENTITY_ID_VALUE, entityId);
+        Assertions.assertEquals(ENTITY_ID_VALUE, entityId);
     }
 
     @Test
@@ -97,6 +97,6 @@ public class MongoServiceTest {
         when(findIterableMocked.projection(any(Bson.class))).thenReturn(findIterableMocked);
         when(findIterableMocked.first()).thenReturn(document);
         String barcode = mongoService.getBarcode(TRANSACTION_ID);
-        assertEquals(BARCODE_VALUE, barcode);
+        Assertions.assertEquals(BARCODE_VALUE, barcode);
     }
 }
