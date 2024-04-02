@@ -26,6 +26,7 @@
         <ch-kafka.version>3.0.1</ch-kafka.version>
         <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
         <private-api-sdk-java.version>4.0.9</private-api-sdk-java.version>
+        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
 
@@ -34,6 +35,12 @@
 
         <!-- Docker -->
         <jib-maven-plugin.version>3.4.1</jib-maven-plugin.version>
+
+        <!-- command line args -->
+        <argLine>
+            --add-opens java.base/java.util=ALL-UNNAMED
+            --add-opens java.base/java.lang=ALL-UNNAMED
+        </argLine>
     </properties>
 
     <dependencyManagement>
@@ -195,12 +202,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <argLine>
-                        --add-opens java.base/java.util=ALL-UNNAMED
-                        --add-opens java.base/java.lang=ALL-UNNAMED
-                    </argLine>
-                </configuration>
             </plugin>
 
             <plugin>
