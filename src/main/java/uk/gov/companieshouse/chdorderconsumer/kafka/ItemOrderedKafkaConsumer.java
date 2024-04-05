@@ -17,6 +17,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.lang.NonNull;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,7 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
             APPLICATION_NAMESPACE + "-" + CHD_ITEM_ORDERED_TOPIC_ERROR;
 
     private static final int MAX_RETRY_ATTEMPTS = 3;
-    private static long errorRecoveryOffset = 0L;
+    private static final long ERROR_RECOVERY_OFFSET = 0L;
 
     private static final Logger LOGGER = LoggingUtils.getLogger();
 
@@ -98,11 +99,11 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
 
     /**
      * Error (`-error`) topic listener/consumer is enabled when the application is launched in error
-     * mode (IS_ERROR_QUEUE_CONSUMER=true). Receives messages up to `errorRecoveryOffset` offset.
+     * mode (IS_ERROR_QUEUE_CONSUMER=true). Receives messages up to `ERROR_RECOVERY_OFFSET` offset.
      * Calls `handleMessage` method to process received message. If the `retryable` processor is
      * unsuccessful with a `retryable` error, after maximum numbers of attempts allowed, the message
      * is republished to `-retry` topic for failover processing. This listener stops accepting
-     * messages when the topic's offset reaches `errorRecoveryOffset`.
+     * messages when the topic's offset reaches `ERROR_RECOVERY_OFFSET`.
      *
      * @param message
      */
@@ -113,11 +114,11 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
     public void processChdItemOrderedError(
             org.springframework.messaging.Message<ChdItemOrdered> message) {
         long offset = Long.parseLong("" + message.getHeaders().get("kafka_offset"));
-        if (offset <= errorRecoveryOffset) {
+        if (offset <= ERROR_RECOVERY_OFFSET) {
             handleMessage(message);
         } else {
             Map<String, Object> logMap = LoggingUtils.createLogMap();
-            logMap.put(LoggingUtils.CHD_ITEM_ORDERED_GROUP_ERROR, errorRecoveryOffset);
+            logMap.put(LoggingUtils.CHD_ITEM_ORDERED_GROUP_ERROR, ERROR_RECOVERY_OFFSET);
             logMap.put(LoggingUtils.TOPIC, CHD_ITEM_ORDERED_TOPIC_ERROR);
             LOGGER.info("Pausing error consumer as error recovery offset reached.",
                     logMap);
@@ -280,17 +281,17 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
     }
 
     @Override
-    public void registerSeekCallback(ConsumerSeekCallback consumerSeekCallback) {
+    public void registerSeekCallback(@NonNull ConsumerSeekCallback consumerSeekCallback) {
 
     }
 
     @Override
-    public void onPartitionsAssigned(Map<TopicPartition, Long> map, ConsumerSeekCallback consumerSeekCallback) {
+    public void onPartitionsAssigned(@NonNull Map<TopicPartition, Long> map, @NonNull ConsumerSeekCallback consumerSeekCallback) {
 
     }
 
     @Override
-    public void onIdleContainer(Map<TopicPartition, Long> map, ConsumerSeekCallback consumerSeekCallback) {
+    public void onIdleContainer(@NonNull Map<TopicPartition, Long> map, @NonNull ConsumerSeekCallback consumerSeekCallback) {
 
     }
 

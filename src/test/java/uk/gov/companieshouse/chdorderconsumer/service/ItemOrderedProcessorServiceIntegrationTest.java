@@ -82,7 +82,7 @@ class ItemOrderedProcessorServiceIntegrationTest {
         // When and then
         assertThatExceptionOfType(ServiceException.class).isThrownBy(() ->
                 processorServiceUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
-                .withMessageContaining("statusCode=401")
+                .withMessageContaining("\"statusCode\":401")
                 .withNoCause();
     }
 
@@ -99,7 +99,7 @@ class ItemOrderedProcessorServiceIntegrationTest {
         // When and then
         assertThatExceptionOfType(RetryableErrorException.class).isThrownBy(() ->
                 processorServiceUnderTest.processItemOrdered(CHD_ITEM_ORDERED))
-                .withMessageContaining("statusCode=500")
+                .withMessageContaining("\"statusCode\":500")
                 .withNoCause();
     }
 }

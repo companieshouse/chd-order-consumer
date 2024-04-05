@@ -9,7 +9,7 @@ public enum RequiredEnvironmentVariables {
     MONGO_PORT_NUMBER("MONGO_PORT_NUMBER"),
     ENTITY_ID_FIELD("ENTITY_ID_FIELD");
 
-    private String name;
+    private final String name;
 
     RequiredEnvironmentVariables(String name) {
         this.name = name;
