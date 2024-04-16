@@ -1,21 +1,41 @@
-#Build artifacts
-target/
-*.jar
-*.zip
+# Compiled class file
+*.class
 
-# Eclipse files
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+target/
 .classpath
 .project
-.settings
-bin/
+.settings/
+.vscode/
+.factorypath
 
-# IntelliJ files
-.idea/
+#Intellij
+.idea
 *.iml
+*.iws
+*.ipr
+.mvn/
 
-# Mac files
-.DS_Store
-._*
+# VS Code
+settings.json
 
-build.log
-
+chd-order-consumer.jar
