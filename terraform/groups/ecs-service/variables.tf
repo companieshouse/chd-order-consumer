@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 variable "environment" {
   type        = string
-  description = "The environment name, defined in envrionments vars."
+  description = "The environment name, defined in environments vars."
 }
 variable "aws_region" {
   default     = "eu-west-2"
@@ -46,7 +46,7 @@ variable "required_memory" {
 variable "max_task_count" {
   type        = number
   description = "The maximum number of tasks for this service."
-  default     = 3
+  default     = 10
 }
 
 variable "use_fargate" {
@@ -92,7 +92,7 @@ variable "service_scaleup_schedule" {
 variable "cloudwatch_alarms_enabled" {
   description = "Whether to create a standard set of cloudwatch alarms for the service.  Requires an SNS topic to have already been created for the stack."
   type        = bool
-  default     = false
+  default     = true
 }
 
 # ------------------------------------------------------------------------------

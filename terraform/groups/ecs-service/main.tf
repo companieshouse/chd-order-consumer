@@ -1,4 +1,3 @@
-
 provider "aws" {
   region = var.aws_region
 }
@@ -20,7 +19,7 @@ terraform {
 }
 
 module "secrets" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=1.0.260"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=1.0.235"
 
   name_prefix = "${local.service_name}-${var.environment}"
   environment = var.environment
@@ -29,7 +28,7 @@ module "secrets" {
 }
 
 module "ecs-service" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.260"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.236"
 
   # Environmental configuration
   environment             = var.environment
@@ -38,7 +37,7 @@ module "ecs-service" {
   vpc_id                  = data.aws_vpc.vpc.id
   ecs_cluster_id          = data.aws_ecs_cluster.ecs_cluster.id
   task_execution_role_arn = data.aws_iam_role.ecs_cluster_iam_role.arn
-
+  batch_service           = true
   
 
   # ECS Task container health check
@@ -67,8 +66,6 @@ module "ecs-service" {
   use_fargate                        = var.use_fargate
   fargate_subnets                    = local.application_subnet_ids
 
-  # Cloudwatch
-  cloudwatch_alarms_enabled = var.cloudwatch_alarms_enabled
 
   # Service environment variable and secret configs
   task_environment          = local.task_environment
