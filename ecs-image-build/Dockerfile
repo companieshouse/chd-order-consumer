@@ -5,6 +5,3 @@ COPY /app .
 COPY docker_start.sh .
 
 CMD ["./docker_start.sh"]
-
-
-# Ask dev to confirm if this is the image thats been used.
