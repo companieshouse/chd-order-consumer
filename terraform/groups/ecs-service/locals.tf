@@ -61,5 +61,4 @@ locals {
     { name : "PORT", value : local.container_port },
     { name : "LOGLEVEL", value : var.log_level }
   ])
-
 }
