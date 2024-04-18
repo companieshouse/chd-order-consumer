@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.APPLICATION_NAME_SPACE;
 import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 
 @DirtiesContext
@@ -29,7 +29,7 @@ import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 @Service
 public class ItemOrderedKafkaConsumerWrapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
     private final CountDownLatch latch = new CountDownLatch(1);
     private String messagePayload;
     private final CHConsumerType testType = CHConsumerType.MAIN_CONSUMER;

@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.chdorderconsumer.kafka;
 
-import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.APPLICATION_NAMESPACE;
+import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.APPLICATION_NAME_SPACE;
 import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.COMPANY_NUMBER;
 import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.ITEM_ID;
 import static uk.gov.companieshouse.chdorderconsumer.logging.LoggingUtils.ORDER_REFERENCE_NUMBER;
@@ -42,11 +42,11 @@ public class ItemOrderedKafkaConsumer implements ConsumerSeekAware {
     private static final String CHD_ITEM_ORDERED_TOPIC_ERROR = "chd-item-ordered-error";
 
     private static final String CHD_ITEM_ORDERED_GROUP =
-            APPLICATION_NAMESPACE + "-" + CHD_ITEM_ORDERED_TOPIC;
+            APPLICATION_NAME_SPACE + "-" + CHD_ITEM_ORDERED_TOPIC;
     private static final String CHD_ITEM_ORDERED_GROUP_RETRY =
-            APPLICATION_NAMESPACE + "-" + CHD_ITEM_ORDERED_TOPIC_RETRY;
+            APPLICATION_NAME_SPACE + "-" + CHD_ITEM_ORDERED_TOPIC_RETRY;
     private static final String CHD_ITEM_ORDERED_GROUP_ERROR =
-            APPLICATION_NAMESPACE + "-" + CHD_ITEM_ORDERED_TOPIC_ERROR;
+            APPLICATION_NAME_SPACE + "-" + CHD_ITEM_ORDERED_TOPIC_ERROR;
 
     private static final int MAX_RETRY_ATTEMPTS = 3;
     private static final long ERROR_RECOVERY_OFFSET = 0L;
