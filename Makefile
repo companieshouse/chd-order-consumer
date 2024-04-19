@@ -28,6 +28,10 @@ test-unit: clean
 test-integration: clean
 	mvn -Dtest=*IntegrationTest test
 
+.PHONY: security-check
+security-check:
+	mvn compile org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=11 -DassemblyAnalyzerEnabled=false
+
 .PHONY: test-contract-provider
 test-contract-provider: clean
 	mvn -Dtest=*ProviderContractTest test
