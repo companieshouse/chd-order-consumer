@@ -8,11 +8,13 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import com.google.gson.GsonBuilder;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.order.chd.MissingImageDeliveryRequestApi;
+import uk.gov.companieshouse.chdorderconsumer.adapter.LocalDateTimeTypeAdapter;
 import uk.gov.companieshouse.chdorderconsumer.exception.DuplicateErrorException;
 import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
 import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
@@ -75,7 +77,7 @@ public class ItemOrderedProcessorService {
             ApiResponse<MissingImageDeliveryRequestApi> missingImageDeliveryRequestApiResponse =
                     chdOrderService.createCHDOrder(POST_MISSING_IMAGE_CHD_ORDER_URI, missingImageDeliveryRequestApi);
             if (missingImageDeliveryRequestApiResponse.getStatusCode() != CREATED.value()) {
-                processError(missingImageDeliveryRequestApiResponse.getStatusCode(), missingImageDeliveryRequestApiResponse.toString());
+                processError(missingImageDeliveryRequestApiResponse.getStatusCode(), convertApiResponseToString(missingImageDeliveryRequestApiResponse));
             }
         } catch (ApiErrorResponseException ex) {
             String id = missingImageDeliveryRequestApi.getId() != null ? missingImageDeliveryRequestApi.getId() : "Unknown";
@@ -93,5 +95,10 @@ public class ItemOrderedProcessorService {
         } else {
             throw new ServiceException(errorResponse);
         }
+    }
+
+    private String convertApiResponseToString(ApiResponse<MissingImageDeliveryRequestApi> missingImageDeliveryRequestApiApiResponse) {
+        return new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter()).create()
+                .toJson(missingImageDeliveryRequestApiApiResponse);
     }
 }

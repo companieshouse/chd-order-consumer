@@ -3,7 +3,6 @@ package uk.gov.companieshouse.chdorderconsumer.service;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -16,6 +15,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -144,13 +144,13 @@ class ItemOrderedProcessorServiceTest {
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryDescription(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getItemOptions().get("filingHistoryDescription")));
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryType(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getItemOptions().get("filingHistoryType")));
         assertThat(missingImageDeliveryRequestApi.getFilingHistoryBarcode(), is(BARCODE));
-        assertNull(missingImageDeliveryRequestApi.getEntityId());
+        Assertions.assertNull(missingImageDeliveryRequestApi.getEntityId());
         assertThat(missingImageDeliveryRequestApi.getItemCost(), is(CHD_ITEM_ORDERED_NO_BARCODE.getItem().getTotalItemCost()));
         assertThat(missingImageDeliveryRequestApi.getEmailAddress(), is(CHD_ITEM_ORDERED_NO_BARCODE.getOrderedBy().getEmail()));
     }
 
     @Test
-    void propogatesRetryableExceptionIfApiErrorResponseExceptionIsInternalServerError() throws ApiErrorResponseException {
+    void propagatesRetryableExceptionIfApiErrorResponseExceptionIsInternalServerError() throws ApiErrorResponseException {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenThrow(buildApiErrorResponseException(INTERNAL_SERVER_ERROR));
 
@@ -160,7 +160,7 @@ class ItemOrderedProcessorServiceTest {
     }
 
     @Test
-    void propogatesServiceExceptionIfApiErrorResponseExceptionIsBadRequest() throws ApiErrorResponseException {
+    void propagatesServiceExceptionIfApiErrorResponseExceptionIsBadRequest() throws ApiErrorResponseException {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenThrow(buildApiErrorResponseException(BAD_REQUEST));
 
@@ -170,7 +170,7 @@ class ItemOrderedProcessorServiceTest {
     }
 
     @Test
-    void propogatesServiceExceptionIfApiErrorResponseExceptionIsUnauthorised() throws ApiErrorResponseException {
+    void propagatesServiceExceptionIfApiErrorResponseExceptionIsUnauthorised() throws ApiErrorResponseException {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenThrow(buildApiErrorResponseException(UNAUTHORIZED));
 
@@ -180,7 +180,7 @@ class ItemOrderedProcessorServiceTest {
     }
 
     @Test
-    void propogatesServiceExceptionIfApiErrorResponseExceptionIsConflicted() throws ApiErrorResponseException {
+    void propagatesServiceExceptionIfApiErrorResponseExceptionIsConflicted() throws ApiErrorResponseException {
         when(chdOrderService.createCHDOrder(anyString(), any(MissingImageDeliveryRequestApi.class)))
                 .thenThrow(buildApiErrorResponseException(CONFLICT));
 
@@ -190,7 +190,7 @@ class ItemOrderedProcessorServiceTest {
     }
 
     @Test
-    void propogatesRetryableExceptionIfApiResponseIsRequestTimeOut() throws ApiErrorResponseException {
+    void propagatesRetryableExceptionIfApiResponseIsRequestTimeOut() throws ApiErrorResponseException {
         ApiResponse<MissingImageDeliveryRequestApi> apiResponse =
                 new ApiResponse<>(REQUEST_TIMEOUT.value(), new HttpHeaders(),
                         new MissingImageDeliveryRequestApi());
@@ -204,7 +204,7 @@ class ItemOrderedProcessorServiceTest {
     }
 
     @Test
-    void propogatesServiceExceptionIfApiResponseIsBadRequest() throws ApiErrorResponseException {
+    void propagatesServiceExceptionIfApiResponseIsBadRequest() throws ApiErrorResponseException {
         ApiResponse<MissingImageDeliveryRequestApi> apiResponse =
                 new ApiResponse<>(BAD_REQUEST.value(), new HttpHeaders(),
                         new MissingImageDeliveryRequestApi());
@@ -218,7 +218,7 @@ class ItemOrderedProcessorServiceTest {
     }
 
     @Test
-    void propogatesServiceExceptionIfApiResponseIsUnauthorised() throws ApiErrorResponseException {
+    void propagatesServiceExceptionIfApiResponseIsUnauthorised() throws ApiErrorResponseException {
         ApiResponse<MissingImageDeliveryRequestApi> apiResponse =
                 new ApiResponse<>(UNAUTHORIZED.value(), new HttpHeaders(),
                         new MissingImageDeliveryRequestApi());

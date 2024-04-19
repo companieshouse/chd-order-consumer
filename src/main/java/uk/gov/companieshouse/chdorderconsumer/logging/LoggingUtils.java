@@ -14,7 +14,7 @@ public class LoggingUtils {
 
     private LoggingUtils() {}
 
-    public static final String APPLICATION_NAMESPACE = "chd-order-consumer";
+    public static final String APPLICATION_NAME_SPACE = "chd-order-consumer";
     public static final String TOPIC = "topic";
     public static final String OFFSET = "offset";
     public static final String KEY = "key";
@@ -29,7 +29,7 @@ public class LoggingUtils {
     public static final String PAYMENT_REFERENCE = "payment_reference";
     public static final String COMPANY_NUMBER = "company_number";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     public static Logger getLogger() {
         return LOGGER;
@@ -44,10 +44,10 @@ public class LoggingUtils {
         Map<String, Object> logMap = LoggingUtils.createLogMap();
         MessageHeaders messageHeaders = message.getHeaders();
 
-        logIfNotNull(logMap, KEY, messageHeaders.get(KafkaHeaders.RECEIVED_MESSAGE_KEY));
+        logIfNotNull(logMap, KEY, messageHeaders.get(KafkaHeaders.RECEIVED_KEY));
         logIfNotNull(logMap, TOPIC, messageHeaders.get(KafkaHeaders.RECEIVED_TOPIC));
         logIfNotNull(logMap, OFFSET, messageHeaders.get(KafkaHeaders.OFFSET));
-        logIfNotNull(logMap, PARTITION, messageHeaders.get(KafkaHeaders.RECEIVED_PARTITION_ID));
+        logIfNotNull(logMap, PARTITION, messageHeaders.get(KafkaHeaders.RECEIVED_PARTITION));
 
         return logMap;
     }
