@@ -46,7 +46,7 @@ variable "required_memory" {
 variable "max_task_count" {
   type        = number
   description = "The maximum number of tasks for this service."
-  default     = 10
+  default     = 1
 }
 
 variable "use_fargate" {
