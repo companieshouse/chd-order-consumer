@@ -59,6 +59,5 @@ locals {
 
   task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map, [
     { name : "PORT", value : local.container_port },
-    { name : "LOGLEVEL", value : var.log_level }
   ])
 }
