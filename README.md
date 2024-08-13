@@ -4,7 +4,7 @@
 Kafka consumer to process scan upon demand orders.
 
 ### Requirements
-* [Java 8][1]
+* [Java 21][1]
 * [Maven][2]
 * [Git][3]
 
