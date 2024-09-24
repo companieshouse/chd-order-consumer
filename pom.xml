@@ -34,7 +34,7 @@
         <spring-boot-maven-plugin.version>3.3.2</spring-boot-maven-plugin.version>
 
         <snakeyaml.version>2.2</snakeyaml.version>
-        <spring-web-version>6.1.11</spring-web-version>
+        <spring-web-version>6.1.12</spring-web-version>
         <spring-kafka-test-version>3.0.13</spring-kafka-test-version>
 
         <!-- Docker -->
