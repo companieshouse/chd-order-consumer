@@ -35,7 +35,6 @@
         <spring-boot-maven-plugin.version>3.5.3</spring-boot-maven-plugin.version>
 
         <snakeyaml.version>2.2</snakeyaml.version>
-        <spring-web-version>6.1.21</spring-web-version>
         <spring-kafka-test-version>3.3.7</spring-kafka-test-version>
 
 
@@ -85,12 +84,6 @@
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>private-api-sdk-java</artifactId>
             <version>${private-api-sdk-java.version}</version>
-        </dependency>
-        <dependency>
-            <!--Overriding spring-web version to remove vulnerability-->
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring-web-version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
