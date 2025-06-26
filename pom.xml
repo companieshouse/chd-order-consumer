@@ -15,34 +15,34 @@
     <description>CH Service consuming kafka messages for Filing History Image Scan Requests</description>
 
     <properties>
-        <commons.lang3.version>3.14.0</commons.lang3.version>
+        <commons.lang3.version>3.17.0</commons.lang3.version>
         <java.version>21</java.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
-        <hamcrest.version>2.2</hamcrest.version>
+        <hamcrest.version>3.0</hamcrest.version>
         <start-class>uk.gov.companieshouse.chdorderconsumer.ChdOrderConsumerApplication</start-class>
         <structured-logging.version>3.0.32</structured-logging.version>
         <kafka-models.version>3.0.18</kafka-models.version>
         <environment-reader-library.version>3.0.1</environment-reader-library.version>
-        <system-rules-version>1.17.2</system-rules-version>
-        <ch-kafka.version>3.0.1</ch-kafka.version>
-        <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
-        <private-api-sdk-java.version>4.0.9</private-api-sdk-java.version>
-        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.3.1</maven-surefire-plugin.version>
+        <system-rules-version>1.19.0</system-rules-version>
+        <ch-kafka.version>3.0.3</ch-kafka.version>
+        <api-sdk-manager-java-library.version>3.0.7</api-sdk-manager-java-library.version>
+        <private-api-sdk-java.version>4.0.314</private-api-sdk-java.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
 
         <spring-boot-dependencies.version>3.5.3</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>3.5.3</spring-boot-maven-plugin.version>
 
-        <snakeyaml.version>2.2</snakeyaml.version>
-        <spring-kafka-test-version>3.3.7</spring-kafka-test-version>
+        <snakeyaml.version>2.4</snakeyaml.version>
+        <sfpring-kafka-test-version>3.3.7</sfpring-kafka-test-version>
 
 
     <!-- Docker -->
-        <jib-maven-plugin.version>3.4.1</jib-maven-plugin.version>
+        <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
 
         <!-- sonar config -->
-		<sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
+		<sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
 		<sonar.java.binaries>${project.basedir}/target</sonar.java.binaries>
 		<sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
 		<sonar.login></sonar.login>
@@ -148,7 +148,6 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
-            <version>${spring-kafka-test-version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.pcollections</groupId>
