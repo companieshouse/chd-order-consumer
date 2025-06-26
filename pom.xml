@@ -20,7 +20,7 @@
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <hamcrest.version>2.2</hamcrest.version>
         <start-class>uk.gov.companieshouse.chdorderconsumer.ChdOrderConsumerApplication</start-class>
-        <structured-logging.version>3.0.4</structured-logging.version>
+        <structured-logging.version>3.0.32</structured-logging.version>
         <kafka-models.version>3.0.18</kafka-models.version>
         <environment-reader-library.version>3.0.1</environment-reader-library.version>
         <system-rules-version>1.17.2</system-rules-version>
