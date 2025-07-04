@@ -20,18 +20,17 @@ public class ChdOrderConsumerApplication {
         }
     }
 
-    /**
-     * Method to check if all of the required configuration variables
-     * defined in EnvironmentVariables enum have been set to a value
-     */
     public static boolean checkEnvironmentVariables() {
-        EnvironmentReader environmentReader = new EnvironmentReaderImpl();
         boolean allVariablesPresent = true;
         LOGGER.info("Checking all environment variables present");
-        for(RequiredEnvironmentVariables param : RequiredEnvironmentVariables.values()) {
-            try{
-                environmentReader.getMandatoryString(param.getName());
-            } catch (EnvironmentVariableException eve) {
+
+        for (RequiredEnvironmentVariables param : RequiredEnvironmentVariables.values()) {
+            String value = System.getenv(param.getName());
+            if (value == null) {
+                value = System.getProperty(param.getName()); // fallback for tests
+            }
+
+            if (value == null || value.isBlank()) {
                 allVariablesPresent = false;
                 LOGGER.error(String.format("Required config item %s missing", param.getName()));
             }
@@ -39,4 +38,5 @@ public class ChdOrderConsumerApplication {
 
         return allVariablesPresent;
     }
+
 }
