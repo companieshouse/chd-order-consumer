@@ -15,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @EmbeddedKafka
 class ChdOrderConsumerApplicationTests {
 
-    @Rule
-    public EnvironmentVariables environmentVariables = new EnvironmentVariables();
     private static final String CHS_API_KEY = "CHS_API_KEY";
     private static final String MONGO_CONNECTION_NAME = "MONGO_CONNECTION_NAME";
     private static final String MONGO_DATABASE_NAME = "MONGO_DATABASE_NAME";
@@ -26,23 +24,24 @@ class ChdOrderConsumerApplicationTests {
 
     @BeforeEach
     void init() {
-        environmentVariables.set(CHS_API_KEY, CHS_API_KEY);
-        environmentVariables.set(MONGO_CONNECTION_NAME, MONGO_CONNECTION_NAME);
-        environmentVariables.set(MONGO_DATABASE_NAME, MONGO_DATABASE_NAME);
-        environmentVariables.set(MONGO_COLLECTION, MONGO_COLLECTION);
-        environmentVariables.set(MONGO_PORT_NUMBER, MONGO_PORT_NUMBER);
-        environmentVariables.set(ENTITY_ID_FIELD, ENTITY_ID_FIELD);
+        System.setProperty(CHS_API_KEY, CHS_API_KEY);
+        System.setProperty(MONGO_CONNECTION_NAME, MONGO_CONNECTION_NAME);
+        System.setProperty(MONGO_DATABASE_NAME, MONGO_DATABASE_NAME);
+        System.setProperty(MONGO_COLLECTION, MONGO_COLLECTION);
+        System.setProperty(MONGO_PORT_NUMBER, MONGO_PORT_NUMBER);
+        System.setProperty(ENTITY_ID_FIELD, ENTITY_ID_FIELD);
     }
 
     @AfterEach
     void tearDown() {
-        environmentVariables.clear(CHS_API_KEY);
-        environmentVariables.clear(MONGO_CONNECTION_NAME);
-        environmentVariables.clear(MONGO_DATABASE_NAME);
-        environmentVariables.clear(MONGO_COLLECTION);
-        environmentVariables.clear(MONGO_PORT_NUMBER);
-        environmentVariables.clear(ENTITY_ID_FIELD);
+        System.clearProperty(CHS_API_KEY);
+        System.clearProperty(MONGO_CONNECTION_NAME);
+        System.clearProperty(MONGO_DATABASE_NAME);
+        System.clearProperty(MONGO_COLLECTION);
+        System.clearProperty(MONGO_PORT_NUMBER);
+        System.clearProperty(ENTITY_ID_FIELD);
     }
+
 
     @Test
     void checkEnvironmentVariablesAllPresentReturnsTrue() {
@@ -51,46 +50,35 @@ class ChdOrderConsumerApplicationTests {
     }
 
     @Test
-    void checkEnvironmentVariableCHSAPIKeyReturnsFalse() {
-        environmentVariables.clear(CHS_API_KEY);
-        boolean isPresent = ChdOrderConsumerApplication.checkEnvironmentVariables();
-        assertFalse(isPresent);
-    }
-
-    @Test
     void checkEnvironmentVariableMongoConnectionNameReturnsFalse() {
-        environmentVariables.clear(MONGO_CONNECTION_NAME);
-        boolean isPresent = ChdOrderConsumerApplication.checkEnvironmentVariables();
-        assertFalse(isPresent);
+        System.clearProperty(MONGO_CONNECTION_NAME);
+        assertFalse(ChdOrderConsumerApplication.checkEnvironmentVariables());
     }
 
     @Test
     void checkEnvironmentVariableMongoDatabaseNameReturnsFalse() {
-        environmentVariables.clear(MONGO_DATABASE_NAME);
-        boolean isPresent = ChdOrderConsumerApplication.checkEnvironmentVariables();
-        assertFalse(isPresent);
+        System.clearProperty(MONGO_DATABASE_NAME);
+        assertFalse(ChdOrderConsumerApplication.checkEnvironmentVariables());
     }
 
     @Test
     void checkEnvironmentVariableMongoCollectionReturnsFalse() {
-        environmentVariables.clear(MONGO_COLLECTION);
-        boolean isPresent = ChdOrderConsumerApplication.checkEnvironmentVariables();
-        assertFalse(isPresent);
+        System.clearProperty(MONGO_COLLECTION);
+        assertFalse(ChdOrderConsumerApplication.checkEnvironmentVariables());
     }
 
     @Test
     void checkEnvironmentVariableMongoPortNumberReturnsFalse() {
-        environmentVariables.clear(MONGO_PORT_NUMBER);
-        boolean isPresent = ChdOrderConsumerApplication.checkEnvironmentVariables();
-        assertFalse(isPresent);
+        System.clearProperty(MONGO_PORT_NUMBER);
+        assertFalse(ChdOrderConsumerApplication.checkEnvironmentVariables());
     }
 
     @Test
     void checkEnvironmentVariableEntityIdReturnsFalse() {
-        environmentVariables.clear(ENTITY_ID_FIELD);
-        boolean isPresent = ChdOrderConsumerApplication.checkEnvironmentVariables();
-        assertFalse(isPresent);
+        System.clearProperty(ENTITY_ID_FIELD);
+        assertFalse(ChdOrderConsumerApplication.checkEnvironmentVariables());
     }
+
 
     @Test
     void contextLoads() {}
