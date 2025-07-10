@@ -20,13 +20,13 @@
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <hamcrest.version>3.0</hamcrest.version>
         <start-class>uk.gov.companieshouse.chdorderconsumer.ChdOrderConsumerApplication</start-class>
-        <structured-logging.version>3.0.32</structured-logging.version>
+        <structured-logging.version>3.0.34</structured-logging.version>
         <kafka-models.version>3.0.18</kafka-models.version>
         <environment-reader-library.version>3.0.1</environment-reader-library.version>
         <system-rules-version>1.19.0</system-rules-version>
-        <ch-kafka.version>3.0.3</ch-kafka.version>
-        <api-sdk-manager-java-library.version>3.0.7</api-sdk-manager-java-library.version>
-        <private-api-sdk-java.version>4.0.314</private-api-sdk-java.version>
+        <ch-kafka.version>3.0.1</ch-kafka.version>
+        <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
+        <private-api-sdk-java.version>4.0.9</private-api-sdk-java.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
