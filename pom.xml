@@ -15,27 +15,31 @@
     <description>CH Service consuming kafka messages for Filing History Image Scan Requests</description>
 
     <properties>
-        <commons.lang3.version>3.17.0</commons.lang3.version>
+        <commons.lang3.version>3.19.0</commons.lang3.version>
         <java.version>21</java.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <hamcrest.version>3.0</hamcrest.version>
         <start-class>uk.gov.companieshouse.chdorderconsumer.ChdOrderConsumerApplication</start-class>
-        <structured-logging.version>3.0.34</structured-logging.version>
-        <kafka-models.version>3.0.18</kafka-models.version>
-        <environment-reader-library.version>3.0.1</environment-reader-library.version>
+        <structured-logging.version>3.0.37</structured-logging.version>
+        <kafka-models.version>3.0.29</kafka-models.version>
+        <environment-reader-library.version>3.0.5</environment-reader-library.version>
         <system-rules-version>1.19.0</system-rules-version>
-        <ch-kafka.version>3.0.1</ch-kafka.version>
-        <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
+        <ch-kafka.version>3.0.7</ch-kafka.version>
+        <api-sdk-manager-java-library.version>3.0.15</api-sdk-manager-java-library.version>
         <private-api-sdk-java.version>4.0.9</private-api-sdk-java.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+        <tomcat-embed-core.version>11.0.14</tomcat-embed-core.version>
+        <log4j-api.version>2.25.3</log4j-api.version>
+        <version.netty>4.2.6.Final</version.netty>
+        <avro.version>1.12.1</avro.version>
 
         <spring-boot-dependencies.version>3.5.3</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>3.5.3</spring-boot-maven-plugin.version>
 
         <snakeyaml.version>2.4</snakeyaml.version>
-        <spring-kafka-test.version>3.3.7</spring-kafka-test.version>
+        <spring-kafka-test.version>3.3.13</spring-kafka-test.version>
 
         <opentelemetry-version>2.14.0</opentelemetry-version>
 
@@ -157,6 +161,7 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
+            <version>${spring-kafka-test.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -222,6 +227,30 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+<!--        Pinning version to address CVE-2025-68161(6.3) log4j-api pulled transitively-->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Pinning version to address CVE-2025-61795(5.3 tomcat-embed-core pulled transitively -->
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>${tomcat-embed-core.version}</version>
+        </dependency>
+        <!-- Pinning version to address CVE-2025-58057(kafka:spring-kafka-test pulled transitively) -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec</artifactId>
+            <version>${version.netty}</version>
+        </dependency>
+        <!-- Pinning version to address CVE-2024-47561(9.3)-->
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>${avro.version}</version>
         </dependency>
     </dependencies>
 
