@@ -31,9 +31,11 @@
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
         <tomcat-embed-core.version>11.0.14</tomcat-embed-core.version>
+        <tomcat-embed-websocket.version>11.0.14</tomcat-embed-websocket.version>
         <log4j-api.version>2.25.3</log4j-api.version>
         <version.netty>4.2.6.Final</version.netty>
         <avro.version>1.12.1</avro.version>
+        <kotlin.version>2.2.21</kotlin.version>
 
         <spring-boot-dependencies.version>3.5.3</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>3.5.3</spring-boot-maven-plugin.version>
@@ -234,23 +236,29 @@
             <artifactId>log4j-api</artifactId>
             <version>${log4j-api.version}</version>
         </dependency>
+        <!-- Pinning version to address CVE-2025-61795(5.3 tomcat-embed-core pulled transitively by
+         spring-boot-starter-web -->
         <dependency>
-            <!-- Pinning version to address CVE-2025-61795(5.3 tomcat-embed-core pulled transitively -->
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
             <version>${tomcat-embed-core.version}</version>
         </dependency>
-        <!-- Pinning version to address CVE-2025-58057(kafka:spring-kafka-test pulled transitively) -->
+        <!-- Pinning version to address CVE-2025-61795 tomcat-embed-websocket pulled transitively-->
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec</artifactId>
-            <version>${version.netty}</version>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>${tomcat-embed-websocket.version}</version>
         </dependency>
         <!-- Pinning version to address CVE-2024-47561(9.3)-->
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
             <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
         </dependency>
     </dependencies>
 
