@@ -33,9 +33,9 @@
         <tomcat-embed-core.version>11.0.14</tomcat-embed-core.version>
         <tomcat-embed-websocket.version>11.0.14</tomcat-embed-websocket.version>
         <log4j-api.version>2.25.3</log4j-api.version>
-        <version.netty>4.2.6.Final</version.netty>
         <avro.version>1.12.1</avro.version>
         <kotlin.version>2.2.21</kotlin.version>
+        <jetty.version>12.0.27</jetty.version>
 
         <spring-boot-dependencies.version>3.5.3</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>3.5.3</spring-boot-maven-plugin.version>
@@ -43,7 +43,7 @@
         <snakeyaml.version>2.4</snakeyaml.version>
         <spring-kafka-test.version>3.3.13</spring-kafka-test.version>
 
-        <opentelemetry-version>2.14.0</opentelemetry-version>
+        <opentelemetry-version>2.21.0</opentelemetry-version>
 
 
     <!-- Docker -->
@@ -260,6 +260,18 @@
             <artifactId>kotlin-stdlib</artifactId>
             <version>${kotlin.version}</version>
         </dependency>
+        <!-- Pinning versions to address CVE-2025-11143(6.5) &  CVE-2026-1605(7.5)-->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-ee</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
