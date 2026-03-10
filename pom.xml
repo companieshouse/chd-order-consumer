@@ -35,7 +35,6 @@
         <log4j-api.version>2.25.3</log4j-api.version>
         <avro.version>1.12.1</avro.version>
         <kotlin.version>2.2.21</kotlin.version>
-        <jetty.version>12.0.27</jetty.version>
 
         <spring-boot-dependencies.version>3.5.3</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>3.5.3</spring-boot-maven-plugin.version>
@@ -126,6 +125,15 @@
                     <groupId>org.eclipse.jetty.http2</groupId>
                     <artifactId>http2-common</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-ee</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-server</artifactId>
+                </exclusion>
+
                 <exclusion>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-compress</artifactId>
@@ -259,17 +267,6 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
             <version>${kotlin.version}</version>
-        </dependency>
-        <!-- Pinning versions to address CVE-2025-11143(6.5) &  CVE-2026-1605(7.5)-->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-ee</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
 
     </dependencies>
