@@ -36,8 +36,8 @@
         <avro.version>1.12.1</avro.version>
         <kotlin.version>2.2.21</kotlin.version>
 
-        <spring-boot-dependencies.version>3.5.3</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.5.3</spring-boot-maven-plugin.version>
+        <spring-boot-dependencies.version>3.5.11</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>3.5.11</spring-boot-maven-plugin.version>
 
         <snakeyaml.version>2.4</snakeyaml.version>
         <spring-kafka-test.version>3.3.13</spring-kafka-test.version>
@@ -133,7 +133,10 @@
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-server</artifactId>
                 </exclusion>
-
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-io</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-compress</artifactId>
