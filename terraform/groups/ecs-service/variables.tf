@@ -70,6 +70,13 @@ variable "service_autoscale_target_value_cpu" {
   description = "Target CPU percentage for the ECS Service to autoscale on"
   default     = 80 # 100 disables autoscaling using CPU as a metric
 }
+
+variable "service_autoscale_scale_out_cooldown" {
+  type        = number
+  description = "Cooldown in seconds for ECS Service scale out (add more tasks)"
+  default     = 300
+}
+
 variable "service_scaledown_schedule" {
   type        = string
   description = "The schedule to use when scaling down the number of tasks to zero."
