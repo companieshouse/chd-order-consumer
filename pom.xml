@@ -162,6 +162,7 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
+            <version>${spring-kafka-test.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -228,6 +229,37 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
         </dependency>
+        <!--        Pinning version to address CVE-2025-68161(6.3) log4j-api pulled transitively-->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j-api.version}</version>
+        </dependency>
+        <!-- Pinning version to address CVE-2025-61795(5.3 tomcat-embed-core pulled transitively by
+         spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>${tomcat-embed-core.version}</version>
+        </dependency>
+        <!-- Pinning version to address CVE-2025-61795 tomcat-embed-websocket pulled transitively-->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>${tomcat-embed-websocket.version}</version>
+        </dependency>
+        <!-- Pinning version to address CVE-2024-47561(9.3)-->
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
