@@ -26,12 +26,11 @@
         <system-rules-version>1.19.0</system-rules-version>
         <ch-kafka.version>3.0.7</ch-kafka.version>
         <api-sdk-manager-java-library.version>3.0.16</api-sdk-manager-java-library.version>
-        <private-api-sdk-java.version>4.0.473</private-api-sdk-java.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
-        <tomcat-embed-core.version>11.0.14</tomcat-embed-core.version>
-        <tomcat-embed-websocket.version>11.0.14</tomcat-embed-websocket.version>
+        <tomcat-embed-core.version>11.0.18</tomcat-embed-core.version>
+        <tomcat-embed-websocket.version>11.0.18</tomcat-embed-websocket.version>
         <log4j-api.version>2.25.3</log4j-api.version>
         <avro.version>1.12.1</avro.version>
         <kotlin.version>2.2.21</kotlin.version>
@@ -91,11 +90,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>uk.gov.companieshouse</groupId>
-            <artifactId>private-api-sdk-java</artifactId>
-            <version>${private-api-sdk-java.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
