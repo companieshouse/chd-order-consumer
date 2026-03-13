@@ -25,8 +25,8 @@
         <environment-reader-library.version>3.0.5</environment-reader-library.version>
         <system-rules-version>1.19.0</system-rules-version>
         <ch-kafka.version>3.0.7</ch-kafka.version>
-        <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
-        <private-api-sdk-java.version>4.0.9</private-api-sdk-java.version>
+        <api-sdk-manager-java-library.version>3.0.16</api-sdk-manager-java-library.version>
+        <private-api-sdk-java.version>4.0.473</private-api-sdk-java.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
