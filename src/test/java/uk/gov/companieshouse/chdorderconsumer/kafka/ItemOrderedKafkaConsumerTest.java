@@ -1,5 +1,24 @@
 package uk.gov.companieshouse.chdorderconsumer.kafka;
 
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestConstants.ORDER_REFERENCE;
+import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.io.JsonEncoder;
+import org.apache.avro.specific.SpecificDatumWriter;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,7 +31,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.messaging.MessageHeaders;
-
 import uk.gov.companieshouse.chdorderconsumer.exception.DuplicateErrorException;
 import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
 import uk.gov.companieshouse.chdorderconsumer.exception.ServiceException;
@@ -22,20 +40,6 @@ import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 import uk.gov.companieshouse.orders.items.ChdItemOrdered;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.chdorderconsumer.util.TestConstants.ORDER_REFERENCE;
-import static uk.gov.companieshouse.chdorderconsumer.util.TestUtils.createOrder;
 
 @ExtendWith(MockitoExtension.class)
 class ItemOrderedKafkaConsumerTest {
@@ -130,12 +134,29 @@ class ItemOrderedKafkaConsumerTest {
 
     @Test
     void republishMessageSuccessfullyCalledForFirstMainMessageOnRetryableErrorException()
-            throws SerializationException {
+            throws SerializationException, IOException {
         // Given & When
         when(serializerFactory.getGenericRecordSerializer(ChdItemOrdered.class)).thenReturn(serializer);
         when(serializer.toBinary(any())).thenReturn(new byte[4]);
         doThrow(new RetryableErrorException(PROCESSING_ERROR_MESSAGE)).when(kafkaConsumer).logMessageReceived(any(), any());
-        kafkaConsumer.handleMessage(createTestMessage(CHD_ITEM_ORDERED_TOPIC));
+
+        org.springframework.messaging.Message<ChdItemOrdered> testMessage = createTestMessage(CHD_ITEM_ORDERED_TOPIC);
+
+        // Serialize to JSON
+        ChdItemOrdered payload = testMessage.getPayload();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        SpecificDatumWriter<ChdItemOrdered> writer = new SpecificDatumWriter<>(ChdItemOrdered.class);
+        JsonEncoder encoder = EncoderFactory.get().jsonEncoder(payload.getSchema(), out);
+
+        writer.write(payload, encoder);
+        encoder.flush();
+        out.close();
+
+        String json = out.toString(StandardCharsets.UTF_8);
+
+        kafkaConsumer.handleMessage(testMessage);
+
         // Then
         verify(kafkaConsumer, times(1)).republishMessageToTopic(any(ChdItemOrdered.class), orderReferenceArgument.capture(),
                 currentTopicArgument.capture(), nextTopicArgument.capture());
@@ -214,8 +235,8 @@ class ItemOrderedKafkaConsumerTest {
         verify(kafkaConsumer, times(1)).processChdItemOrderedError(any());
     }
 
-    private static org.springframework.messaging.Message createTestMessage(String receivedTopic) {
-        return new org.springframework.messaging.Message<ChdItemOrdered>() {
+    private static org.springframework.messaging.Message<ChdItemOrdered> createTestMessage(String receivedTopic) {
+        return new org.springframework.messaging.Message<>() {
             @Override
             public ChdItemOrdered getPayload() {
                 return createOrder();
