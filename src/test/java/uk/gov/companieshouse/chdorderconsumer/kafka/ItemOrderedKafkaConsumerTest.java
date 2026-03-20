@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.chdorderconsumer.kafka;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -153,7 +154,8 @@ class ItemOrderedKafkaConsumerTest {
         encoder.flush();
         out.close();
 
-//        String json = out.toString(StandardCharsets.UTF_8);
+        String json = out.toString(StandardCharsets.UTF_8);
+        assertNotNull(json);
 
         kafkaConsumer.handleMessage(testMessage);
 
