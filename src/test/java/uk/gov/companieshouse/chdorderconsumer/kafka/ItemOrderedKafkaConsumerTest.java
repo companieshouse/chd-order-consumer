@@ -154,6 +154,7 @@ class ItemOrderedKafkaConsumerTest {
         out.close();
 
         String json = out.toString(StandardCharsets.UTF_8);
+        Assertions.assertEquals(1549, json.length());
 
         kafkaConsumer.handleMessage(testMessage);
 
