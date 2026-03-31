@@ -47,6 +47,12 @@ variable "required_memory" {
 variable "max_task_count" {
   type        = number
   description = "The maximum number of tasks for this service."
+  default     = 3
+}
+
+variable "min_task_count" {
+  type        = number
+  description = "The minimum number of tasks for this service."
   default     = 1
 }
 
@@ -94,6 +100,12 @@ variable "service_scaleup_schedule" {
   default     = ""
 }
 
+variable "service_autoscale_scale_in_cooldown" {
+  type        = number
+  description = "Cooldown in seconds for ECS Service scale in (run fewer tasks)"
+  default     = 300
+}
+
 # ----------------------------------------------------------------------
 # Cloudwatch alerts
 # ----------------------------------------------------------------------
@@ -106,6 +118,7 @@ variable "cloudwatch_alarms_enabled" {
 # ------------------------------------------------------------------------------
 # Service environment variable configs
 # ------------------------------------------------------------------------------
+
 variable "ssm_version_prefix" {
   type        = string
   description = "String to use as a prefix to the names of the variables containing variables and secrets version."
@@ -121,4 +134,40 @@ variable "use_set_environment_files" {
 variable "chd_order_consumer_version" {
   type        = string
   description = "The version of the chd-order-consumer container to run."
+}
+
+variable "task_healthcheck_interval" {
+  type        = number
+  description = "Health check interval configuration for ECS task definitions."
+}
+
+variable "task_healthcheck_timeout" {
+  type        = number
+  description = "Health check timeout configuration for ECS task definitions."
+}
+
+variable "task_healthcheck_retries" {
+  type        = number
+  description = "Health check retries configuration for ECS task definitions."
+}
+
+variable "task_healthcheck_start_period" {
+  type        = number
+  description = "Health check start period configuration for ECS task definitions."
+}
+
+# ------------------------------------------------------------------------------
+# Dual Deployment / Strangler Fig configs
+# ------------------------------------------------------------------------------
+
+variable "create_old_kafka_service" {
+  type        = bool
+  description = "Whether to create the old Kafka 0.10 ECS service alongside the upgraded one."
+  default     = false
+}
+
+variable "chd_order_consumer_old_kafka_version" {
+  type        = string
+  description = "The specific release tag for the old Kafka 0.10 version of the container."
+  default     = "latest"
 }

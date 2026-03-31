@@ -4,6 +4,7 @@ locals {
   name_prefix                = "${local.stack_name}-${var.environment}"
   global_prefix              = "global-${var.environment}"
   service_name               = "chd-order-consumer"
+  service_name_old_kafka     = "chd-order-consumer-old-kafka"
   container_port             = "8080"
   docker_repo                = "chd-order-consumer"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
@@ -12,6 +13,7 @@ locals {
   vpc_name                   = local.stack_secrets["vpc_name"]
   s3_config_bucket           = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
   app_environment_filename   = "chd-order-consumer.env"
+  app_environment_filename_old_kafka = "chd-order-consumer-old-kafka.env"
   use_set_environment_files  = var.use_set_environment_files
   application_subnet_ids     = data.aws_subnets.application.ids
   application_subnet_pattern = local.stack_secrets["application_subnet_pattern"]
@@ -40,7 +42,6 @@ locals {
       { "name"  = "GLOBAL_${var.ssm_version_prefix}${replace(upper(basename(sec.name)), "-", "_")}", "value" = sec.version }
   ]
 
-
   service_secrets_arn_map = {
     for sec in module.secrets.secrets :
     trimprefix(sec.name, "/${local.service_name}-${var.environment}/") => sec.arn
@@ -58,7 +59,7 @@ locals {
   # secrets to go in list
   task_secrets = concat(local.global_secret_list,local.service_secret_list)
 
-  task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map, [
-    { name : "PORT", value : local.container_port }
+  task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
+    { "name" : "PORT", "value" : local.container_port }
   ])
 }
