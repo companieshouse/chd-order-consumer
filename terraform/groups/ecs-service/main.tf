@@ -38,18 +38,12 @@ module "ecs-service" {
   ecs_cluster_id          = data.aws_ecs_cluster.ecs_cluster.id
   task_execution_role_arn = data.aws_iam_role.ecs_cluster_iam_role.arn
   batch_service           = true
-  
 
   # ECS Task container health check
-  use_task_container_healthcheck = true
-  healthcheck_path               = local.healthcheck_path
-  healthcheck_matcher            = local.healthcheck_matcher
-  healthcheck_unhealthy_threshold   = "5"
-    # Pass health check configuration, including optional startPeriod
-  task_healthcheck_interval      = var.task_healthcheck_interval
-  task_healthcheck_timeout       = var.task_healthcheck_timeout
-  task_healthcheck_retries       = var.task_healthcheck_retries
-  task_healthcheck_start_period  = var.task_healthcheck_start_period
+  use_task_container_healthcheck  = true
+  healthcheck_path                = local.healthcheck_path
+  healthcheck_matcher             = local.healthcheck_matcher
+  healthcheck_unhealthy_threshold = "5"
 
   # Docker container details
   docker_registry   = var.docker_registry
@@ -58,22 +52,22 @@ module "ecs-service" {
   container_port    = local.container_port
 
   # Service configuration
-  service_name                       = local.service_name
-  name_prefix                        = local.name_prefix
-  desired_task_count                 = var.desired_task_count
-  min_task_count                     = var.min_task_count
-  max_task_count                     = var.max_task_count
-  required_cpus                      = var.required_cpus
-  required_memory                    = var.required_memory
-  service_autoscale_enabled          = var.service_autoscale_enabled
-  service_autoscale_target_value_cpu = var.service_autoscale_target_value_cpu
-  service_scaledown_schedule         = var.service_scaledown_schedule
-  service_scaleup_schedule           = var.service_scaleup_schedule
+  service_name                         = local.service_name
+  name_prefix                          = local.name_prefix
+  desired_task_count                   = var.desired_task_count
+  min_task_count                       = var.min_task_count
+  max_task_count                       = var.max_task_count
+  required_cpus                        = var.required_cpus
+  required_memory                      = var.required_memory
+  service_autoscale_enabled            = var.service_autoscale_enabled
+  service_autoscale_target_value_cpu   = var.service_autoscale_target_value_cpu
+  service_scaledown_schedule           = var.service_scaledown_schedule
+  service_scaleup_schedule             = var.service_scaleup_schedule
   service_autoscale_scale_out_cooldown = var.service_autoscale_scale_out_cooldown
   service_autoscale_scale_in_cooldown  = var.service_autoscale_scale_in_cooldown
-  use_capacity_provider              = var.use_capacity_provider
-  use_fargate                        = var.use_fargate
-  fargate_subnets                    = local.application_subnet_ids
+  use_capacity_provider                = var.use_capacity_provider
+  use_fargate                          = var.use_fargate
+  fargate_subnets                      = local.application_subnet_ids
 
   # Service environment variable and secret configs
   task_environment          = local.task_environment
@@ -94,6 +88,8 @@ module "ecs-service-old-kafka" {
   ecs_cluster_id          = data.aws_ecs_cluster.ecs_cluster.id
   task_execution_role_arn = data.aws_iam_role.ecs_cluster_iam_role.arn
   batch_service           = true
+
+  # Disable Alarms
   cloudwatch_unhealthy_host_count_enabled = false
   cloudwatch_healthy_host_count_enabled   = false
   cloudwatch_response_time_enabled        = false
@@ -104,13 +100,8 @@ module "ecs-service-old-kafka" {
   use_task_container_healthcheck    = true
   healthcheck_path                  = local.healthcheck_path
   healthcheck_matcher               = local.healthcheck_matcher
+  healthcheck_unhealthy_threshold   = "5"
   health_check_grace_period_seconds = 180
-
-  # Inherited from custom chd-order-consumer health checks
-  task_healthcheck_interval      = var.task_healthcheck_interval
-  task_healthcheck_timeout       = var.task_healthcheck_timeout
-  task_healthcheck_retries       = var.task_healthcheck_retries
-  task_healthcheck_start_period  = var.task_healthcheck_start_period
 
   # Docker container details
   docker_registry   = var.docker_registry
@@ -119,24 +110,22 @@ module "ecs-service-old-kafka" {
   container_port    = local.container_port
 
   # Service configuration
-  service_name                       = local.service_name_old_kafka
-  name_prefix                        = local.name_prefix
-  # Service performance and scaling configs
-
-  desired_task_count                 = var.desired_task_count
-  min_task_count                     = var.min_task_count
-  max_task_count                     = var.max_task_count
-  required_cpus                      = var.required_cpus
-  required_memory                    = var.required_memory
-  service_autoscale_enabled          = var.service_autoscale_enabled
-  service_autoscale_target_value_cpu = var.service_autoscale_target_value_cpu
-  service_scaledown_schedule         = var.service_scaledown_schedule
-  service_scaleup_schedule           = var.service_scaleup_schedule
+  service_name                         = local.service_name_old_kafka
+  name_prefix                          = local.name_prefix
+  desired_task_count                   = var.desired_task_count
+  min_task_count                       = var.min_task_count
+  max_task_count                       = var.max_task_count
+  required_cpus                        = var.required_cpus
+  required_memory                      = var.required_memory
+  service_autoscale_enabled            = var.service_autoscale_enabled
+  service_autoscale_target_value_cpu   = var.service_autoscale_target_value_cpu
+  service_scaledown_schedule           = var.service_scaledown_schedule
+  service_scaleup_schedule             = var.service_scaleup_schedule
   service_autoscale_scale_out_cooldown = var.service_autoscale_scale_out_cooldown
   service_autoscale_scale_in_cooldown  = var.service_autoscale_scale_in_cooldown
-  use_capacity_provider              = var.use_capacity_provider
-  use_fargate                        = var.use_fargate
-  fargate_subnets                    = local.application_subnet_ids
+  use_capacity_provider                = var.use_capacity_provider
+  use_fargate                          = var.use_fargate
+  fargate_subnets                      = local.application_subnet_ids
 
   # Service environment variable and secret configs
   task_environment          = local.task_environment
