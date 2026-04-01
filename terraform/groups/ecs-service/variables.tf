@@ -136,26 +136,6 @@ variable "chd_order_consumer_version" {
   description = "The version of the chd-order-consumer container to run."
 }
 
-variable "task_healthcheck_interval" {
-  type        = number
-  description = "Health check interval configuration for ECS task definitions."
-}
-
-variable "task_healthcheck_timeout" {
-  type        = number
-  description = "Health check timeout configuration for ECS task definitions."
-}
-
-variable "task_healthcheck_retries" {
-  type        = number
-  description = "Health check retries configuration for ECS task definitions."
-}
-
-variable "task_healthcheck_start_period" {
-  type        = number
-  description = "Health check start period configuration for ECS task definitions."
-}
-
 # ------------------------------------------------------------------------------
 # Dual Deployment / Strangler Fig configs
 # ------------------------------------------------------------------------------
