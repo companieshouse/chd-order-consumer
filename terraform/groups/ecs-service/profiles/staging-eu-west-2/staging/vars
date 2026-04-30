@@ -12,3 +12,7 @@ service_scaleup_schedule   = "5 6 * * ? *"
 required_cpus = 512
 required_memory = 1024
 service_autoscale_scale_out_cooldown = 600
+
+# Enable Parallel Old Kafka Service
+create_old_kafka_service = true
+chd_order_consumer_old_kafka_version = "0.1.57" 
