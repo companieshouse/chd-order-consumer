@@ -21,7 +21,9 @@
         <hamcrest.version>3.0</hamcrest.version>
         <start-class>uk.gov.companieshouse.chdorderconsumer.ChdOrderConsumerApplication</start-class>
         <structured-logging.version>3.0.37</structured-logging.version>
-        <kafka-models.version>3.0.29</kafka-models.version>
+        <spring-framework.version>6.2.19</spring-framework.version>
+        <kafka-models.version>3.0.33</kafka-models.version>
+        <kafka-clients.version>3.9.2</kafka-clients.version>
         <environment-reader-library.version>3.0.5</environment-reader-library.version>
         <system-rules-version>1.19.0</system-rules-version>
         <ch-kafka.version>3.0.7</ch-kafka.version>
@@ -29,19 +31,23 @@
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
-        <tomcat-embed-core.version>11.0.18</tomcat-embed-core.version>
-        <tomcat-embed-websocket.version>11.0.18</tomcat-embed-websocket.version>
-        <log4j-api.version>2.25.3</log4j-api.version>
+        <tomcat-embed-core.version>11.0.22</tomcat-embed-core.version>
+        <tomcat-embed-websocket.version>11.0.22</tomcat-embed-websocket.version>
+        <log4j-api.version>2.25.4</log4j-api.version>
+        <log4j-to-slf4j.version>2.25.4</log4j-to-slf4j.version>
         <avro.version>1.12.1</avro.version>
         <kotlin.version>2.2.21</kotlin.version>
+        <jetty-bom.version>12.1.10</jetty-bom.version>
+        <jose4j.version>0.9.6</jose4j.version>
+        <jetty.version>12.1.10</jetty.version>
 
-        <spring-boot-dependencies.version>3.5.11</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.5.11</spring-boot-maven-plugin.version>
+        <spring-boot-dependencies.version>3.5.15</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>3.5.14</spring-boot-maven-plugin.version>
 
         <snakeyaml.version>2.4</snakeyaml.version>
         <spring-kafka-test.version>3.3.13</spring-kafka-test.version>
 
-        <opentelemetry-version>2.21.0</opentelemetry-version>
+        <opentelemetry-version>2.29.0</opentelemetry-version>
 
 
     <!-- Docker -->
@@ -72,6 +78,34 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- spring-framework BOM to align all Spring Framework dependencies to the same version -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring-framework.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- CVE-2026-33558(5.3) -->
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka-clients.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.lz4</groupId>
+                        <artifactId>lz4-java</artifactId>
+                    </exclusion>
+            </exclusions>
+            </dependency>
+            <!-- CVE-2026-2332 (Critical) -->
+            <dependency>
+                <groupId>org.eclipse.jetty.ee10</groupId>
+                <artifactId>jetty-ee10-bom</artifactId>
+                <version>${jetty-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-bom</artifactId>
@@ -83,6 +117,33 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-to-slf4j</artifactId>
+                <version>${log4j-to-slf4j.version}</version>
+            </dependency>
+            <!-- CVE-2024-29371 -->
+            <dependency>
+                <groupId>org.bitbucket.b_c</groupId>
+                <artifactId>jose4j</artifactId>
+                <version>${jose4j.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <!-- Addresses CVE-2026-41417 across all io.netty:netty-* artifacts -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>4.2.13.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-bom</artifactId>
+                <version>12.1.10</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -185,6 +246,10 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.opentelemetry.instrumentation</groupId>
+                    <artifactId>opentelemetry-logback-appender-1.0</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
