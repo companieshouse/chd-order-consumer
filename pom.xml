@@ -24,7 +24,7 @@
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
-        <tomcat-embed-core.version>11.0.22</tomcat-embed-core.version>
+        <tomcat-embed-core.version>11.0.26</tomcat-embed-core.version>
         <tomcat-embed-websocket.version>11.0.22</tomcat-embed-websocket.version>
         <log4j-api.version>2.25.4</log4j-api.version>
         <log4j-to-slf4j.version>2.25.4</log4j-to-slf4j.version>
