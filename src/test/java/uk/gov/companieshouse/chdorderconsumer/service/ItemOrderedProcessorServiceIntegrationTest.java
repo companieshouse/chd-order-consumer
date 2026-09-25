@@ -5,8 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.order.chd.MissingImageDeliveryRequestApi;
 import uk.gov.companieshouse.chdorderconsumer.exception.RetryableErrorException;
@@ -35,13 +35,13 @@ class ItemOrderedProcessorServiceIntegrationTest {
     @Autowired
     private ItemOrderedProcessorService processorServiceUnderTest;
 
-    @MockBean
+    @MockitoBean
     private CHDOrderService chdOrderService;
 
-    @MockBean
+    @MockitoBean
     private ItemOrderedKafkaProducer producer;
 
-    @MockBean
+    @MockitoBean
     private MongoService mockMongoService;
 
     static {
