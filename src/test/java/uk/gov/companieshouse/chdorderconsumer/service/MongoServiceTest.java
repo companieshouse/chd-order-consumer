@@ -11,8 +11,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.junit.Rule;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,8 +41,6 @@ public class MongoServiceTest {
     @Mock
     private FindIterable<Document> findIterableMocked;
 
-    @Rule
-    public EnvironmentVariables environmentVariables = new EnvironmentVariables();
     private static final String MONGO_DATABASE_NAME = "MONGO_DATABASE_NAME";
     private static final String MONGO_COLLECTION = "MONGO_COLLECTION";
     private static final String ID = "_id";

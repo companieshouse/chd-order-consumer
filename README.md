@@ -23,7 +23,6 @@ Path | Method | Description
 --- | --- | ---
 *`/healthcheck`* | GET | Returns HTTP OK (`200`) to indicate a healthy application instance.
 
-
 ## Terraform ECS
 
 ### What does this code do?

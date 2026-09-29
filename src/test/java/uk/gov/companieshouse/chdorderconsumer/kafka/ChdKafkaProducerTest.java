@@ -3,10 +3,11 @@ package uk.gov.companieshouse.chdorderconsumer.kafka;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.producer.Acks;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class ChdKafkaProducerTest {
 
     private static final int TEST_RETRIES = 5;
@@ -47,18 +49,16 @@ public class ChdKafkaProducerTest {
     @Mock
     private KafkaProducerFactory mockProducerFactory;
 
-    @Before
-    public void test() {
-        MockitoAnnotations.initMocks(this);
+    @BeforeEach
+    public void setUp() {
         createTestMessage();
 
         when(mockProducerFactory.getProducer(any(Properties.class))).thenReturn(mockKafkaProducer);
-        given(mockKafkaProducer.send(any(ProducerRecord.class))).willReturn(recordMetadataFuture);
     }
 
     @Test
     public void testSendAndReturnFuture() throws Exception {
-
+        stubKafkaSend();
         createTestProducer(true, Acks.NO_RESPONSE);
         producer.sendAndReturnFuture(message);
 
@@ -68,6 +68,7 @@ public class ChdKafkaProducerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testSendRoundRobinAcksNoResponse() throws Exception {
+        stubKafkaSend();
         createTestProducer(true, Acks.NO_RESPONSE);
         producer.send(message);
         verify(mockKafkaProducer).send(any(ProducerRecord.class));
@@ -77,6 +78,7 @@ public class ChdKafkaProducerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testSendManualPartitionAcksNoResponse() throws Exception {
+        stubKafkaSend();
         createTestProducer(false, Acks.NO_RESPONSE);
         producer.send(message);
         verify(mockKafkaProducer).send(any(ProducerRecord.class));
@@ -86,6 +88,7 @@ public class ChdKafkaProducerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testSendRoundRobinAcksWaitForLocal() throws Exception {
+        stubKafkaSend();
         createTestProducer(true, Acks.WAIT_FOR_LOCAL);
         producer.send(message);
         verify(mockKafkaProducer).send(any(ProducerRecord.class));
@@ -95,6 +98,7 @@ public class ChdKafkaProducerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testSendRoundRobinAcksWaitForAll() throws Exception {
+        stubKafkaSend();
         createTestProducer(true, Acks.WAIT_FOR_ALL);
         producer.send(message);
         verify(mockKafkaProducer).send(any(ProducerRecord.class));
@@ -106,6 +110,10 @@ public class ChdKafkaProducerTest {
         createTestProducer(true, Acks.NO_RESPONSE);
         producer.close();
         verify(mockKafkaProducer).close();
+    }
+
+    private void stubKafkaSend() {
+        given(mockKafkaProducer.send(any(ProducerRecord.class))).willReturn(recordMetadataFuture);
     }
 
     /**
